@@ -6,7 +6,7 @@
 
 namespace {
 
-void test_parallel_for_range(bool isExecutedOnDevice) {
+void test_parallel_for_range(bool const isExecutedOnDevice) {
   using DualView = Kokkos::DualView<int *>;
   DualView data("data", 10);
 
@@ -38,7 +38,7 @@ TEST(test_parallel_for, test_range) {
 
 namespace {
 
-void test_parallel_for_range_simple(bool isExecutedOnDevice) {
+void test_parallel_for_range_simple(bool const isExecutedOnDevice) {
   using DualView = Kokkos::DualView<int *>;
   DualView data("data", 10);
 
@@ -69,7 +69,7 @@ TEST(test_parallel_for, test_range_simple) {
 
 namespace {
 
-void test_parallel_for_mdrange(bool isExecutedOnDevice) {
+void test_parallel_for_mdrange(bool const isExecutedOnDevice) {
   using DualView = Kokkos::DualView<int **>;
   DualView data("data", 10, 10);
 
@@ -102,7 +102,7 @@ TEST(test_parallel_for, test_mdrange) {
 
 namespace {
 
-void test_parallel_reduce_range(bool isExecutedOnDevice) {
+void test_parallel_reduce_range(bool const isExecutedOnDevice) {
   int value = 0;
   dynk::parallel_reduce(
       isExecutedOnDevice, "label", Kokkos::RangePolicy(0, 10),
