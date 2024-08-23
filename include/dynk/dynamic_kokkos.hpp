@@ -5,7 +5,7 @@
  * This code proposes helper functions to run parallel block regions on either
  * the device or on the host, the choice being done at runtime. The signature
  * of the familiar `parallel_for` and `parallel_reduce` functions is left
- * similar, the list of arguments is prepended with a Boolean value, indicating
+ * similar, the list of paramuments is prepended with a Boolean value, indicating
  * if the code should run on the device (i.e. on
  * `Kokkos::DefaultExecutionSpace` by default) or not (i.e. on
  * `Kokkos::DefaultHostExecutionSpace` by default). Note that only the most
@@ -27,7 +27,7 @@ namespace impl {
 /**
  * @brief Recreate a range execution policy for the requested execution space.
  * @tparam ExecutionSpace Requested execution space.
- * @arg policy Execution policy to recreate.
+ * @param policy Execution policy to recreate.
  * @return Recreated execution policy.
  */
 template <typename ExecutionSpace>
@@ -39,7 +39,7 @@ auto recreateExecutionPolicy(Kokkos::RangePolicy<> const &policy) {
  * @brief Recreate a simple range execution policy for the requested execution
  * space.
  * @tparam ExecutionSpace Requested execution space.
- * @arg end Number of elements to work on.
+ * @param end Number of elements to work on.
  * @return Recreated execution policy.
  */
 template <typename ExecutionSpace> auto recreateExecutionPolicy(int const end) {
@@ -50,7 +50,7 @@ template <typename ExecutionSpace> auto recreateExecutionPolicy(int const end) {
  * @brief Recreate a multi-dimensional range execution policy for the requested
  * execution space.
  * @tparam ExecutionSpace Requested execution space.
- * @arg policy Execution policy to recreate.
+ * @param policy Execution policy to recreate.
  * @return Recreated execution policy.
  */
 template <typename ExecutionSpace, typename Rank>
@@ -70,12 +70,12 @@ auto recreateExecutionPolicy(Kokkos::MDRangePolicy<Rank> const &policy) {
  * defaults to Kokkos default execution space.
  * @tparam HostExecutionSpace Kokkos execution space for host execution,
  * defaults to Kokkos default host execution space.
- * @arg isExecutedOnDevice If `true`, the parallel for is executed on the
+ * @param isExecutedOnDevice If `true`, the parallel for is executed on the
  * device, otherwise on the host.
- * @arg label Label of the kernel.
- * @arg dummyExecutionPolicy Execution policy that will be adapted for device
+ * @param label Label of the kernel.
+ * @param dummyExecutionPolicy Execution policy that will be adapted for device
  * and host execution.
- * @arg kernel Kernel to execute withing a Kokkos parallel for region.
+ * @param kernel Kernel to execute withing a Kokkos parallel for region.
  */
 template <typename ExecutionPolicy, typename Kernel,
           typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
@@ -108,12 +108,12 @@ void parallel_for(bool const isExecutedOnDevice, std::string const &label,
  * defaults to Kokkos default execution space.
  * @tparam HostExecutionSpace Kokkos execution space for host execution,
  * defaults to Kokkos default host execution space.
- * @arg isExecutedOnDevice If `true`, the parallel for is executed on the
+ * @param isExecutedOnDevice If `true`, the parallel for is executed on the
  * device, otherwise on the host.
- * @arg label Label of the kernel.
- * @arg dummyExecutionPolicy Execution policy that will be adapted for device
+ * @param label Label of the kernel.
+ * @param dummyExecutionPolicy Execution policy that will be adapted for device
  * and host execution.
- * @arg kernel Kernel to execute withing a Kokkos parallel for region.
+ * @param kernel Kernel to execute withing a Kokkos parallel for region.
  */
 template <typename ExecutionPolicy, typename Kernel, typename... Reducer,
           typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,

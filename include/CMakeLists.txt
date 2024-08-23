@@ -7,7 +7,9 @@ target_sources(
     dynk
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynk/dynamic_kokkos.hpp>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynk/dynamic.hpp>
         $<INSTALL_INTERFACE:dynk/dynamic_kokkos.hpp>
+        $<INSTALL_INTERFACE:dynk/dynamic.hpp>
 )
 
 target_include_directories(

@@ -9,3 +9,15 @@ target_link_libraries(
     Dynk::dynk
     GTest::gtest
 )
+
+add_executable(
+    test-dynamic
+    main.cpp
+    test_dynamic.cpp
+)
+
+target_link_libraries(
+    test-dynamic
+    Dynk::dynk
+    GTest::gtest
+)
