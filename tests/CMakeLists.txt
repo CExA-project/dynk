@@ -10,6 +10,8 @@ target_link_libraries(
     GTest::gtest
 )
 
+gtest_discover_tests(test-dynk)
+
 add_executable(
     test-wrapper
     main.cpp
@@ -21,3 +23,5 @@ target_link_libraries(
     Dynk::dynk
     GTest::gtest
 )
+
+gtest_discover_tests(test-wrapper)
