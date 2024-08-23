@@ -45,6 +45,7 @@ void wrap(bool const isExecutedOnDevice,
 
 /**
  * Get a View of a DualView for the requested memory space.
+ *
  * The DualView memory spaces should match with the ones expected. This
  * function is just a pass-through to manipulate the DualView with a simpler
  * syntax.
@@ -61,6 +62,7 @@ auto getView(DualView &dualView) {
 
 /**
  * Set that a DualView was modified in the requested memory space.
+ *
  * The DualView memory spaces should match with the ones expected. This
  * function is just a pass-through to manipulate the DualView with a simpler
  * syntax.
