@@ -11,16 +11,22 @@ namespace dynk {
  * @tparam ParallelLauncher Type of the functor.
  * @tparam DeviceExecutionSpace Kokkos execution space for device execution,
  * defaults to Kokkos default execution space.
+ * @tparam DeviceMemorySpace Kokkos memory space for device memory, defaults to
+ * Kokkos default execution space's default memory space.
  * @tparam HostExecutionSpace Kokkos execution space for host execution,
  * defaults to Kokkos default host execution space.
+ * @tparam HostMemorySpace Kokkos memory space for host memory, defaults to
+ * Kokkos default host execution space's default memory space.
  * @param isExecutedOnDevice If `true`, the parallel block region is launched
  * for execution on the device, otherwise on the host.
  * @param parallelLauncher Functor to launch that contains a parallel block region.
  */
 template <typename ParallelLauncher,
           typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
-          typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace>
-void dynamicLaunch(bool const isExecutedOnDevice,
+          typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
+          typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace,
+          typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
+void wrap(bool const isExecutedOnDevice,
                    ParallelLauncher const &parallelLauncher) {
   // NOTE: Beware the ugly syntax below! We're calling a templated functor, for
   // which the parenthesis operator is actually templated, hence the need to
@@ -29,11 +35,11 @@ void dynamicLaunch(bool const isExecutedOnDevice,
   if (isExecutedOnDevice) {
     // launch for device execution
     parallelLauncher.template operator()<
-        DeviceExecutionSpace, typename DeviceExecutionSpace::memory_space>();
+        DeviceExecutionSpace, DeviceMemorySpace>();
   } else {
     // launch for host execution
     parallelLauncher.template
-    operator()<HostExecutionSpace, typename HostExecutionSpace::memory_space>();
+    operator()<HostExecutionSpace, HostMemorySpace>();
   }
 }
 

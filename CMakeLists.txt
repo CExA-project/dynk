@@ -8,8 +8,6 @@ project(
 
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")
 
-set(CMAKE_CXX_STANDARD 20)
-
 include(options)
 include(dependencies)
 

@@ -11,13 +11,13 @@ target_link_libraries(
 )
 
 add_executable(
-    test-dynamic
+    test-wrapper
     main.cpp
-    test_dynamic.cpp
+    test_wrapper.cpp
 )
 
 target_link_libraries(
-    test-dynamic
+    test-wrapper
     Dynk::dynk
     GTest::gtest
 )

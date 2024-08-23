@@ -2,7 +2,7 @@
 #include <Kokkos_DualView.hpp>
 #include <gtest/gtest.h>
 
-#include "dynk/dynamic.hpp"
+#include "dynk/wrapper.hpp"
 
 template <typename View>
 struct ParallelForRangeFunctor {
@@ -19,7 +19,7 @@ void test_parallel_for_range(bool const isExecutedOnDevice) {
   using DualView = Kokkos::DualView<int *>;
   DualView dataDV("data", 10);
 
-  dynk::dynamicLaunch(
+  dynk::wrap(
       isExecutedOnDevice, [&]<typename ExecutionSpace, typename MemorySpace>() {
         auto dataV = dynk::getView<MemorySpace>(dataDV);
         Kokkos::parallel_for(
@@ -46,7 +46,7 @@ struct ParallelReduceRangeFunctor {
 
 void test_parallel_reduce_range(bool const isExecutedOnDevice) {
   int value = 0;
-  dynk::dynamicLaunch(
+  dynk::wrap(
       isExecutedOnDevice, [&]<typename ExecutionSpace, typename MemorySpace>() {
         Kokkos::parallel_reduce(
             "label", Kokkos::RangePolicy<ExecutionSpace>(0, 10),
