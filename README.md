@@ -53,7 +53,7 @@ target_link_libraries(
 
 ### Copy files
 
-Alternatively, you can also copy `include/dynk/dynamic_kokkos.hpp` in your project and start using it.
+Alternatively, you can also copy `include/dynk` in your project and start using it.
 
 ## Use
 
@@ -78,8 +78,7 @@ struct Functor {
 };
 
 void soSomething() {
-    using DualView = Kokkos::DualView<int *>;
-    DualView dataDV("data", 10);
+    Kokkos::DualView<int *> dataDV("data", 10);
     bool isExecutedOnDevice = true;  // can be changed at will
 
     dynk::wrap(
@@ -94,10 +93,10 @@ void soSomething() {
             Kokkos::parallel_for(
                 "label",
                 Kokkos::RangePolicy<ExecutionSpace>(0, 10),
-                ParallelForRangeFunctor(dataV)
+                Functor(dataV)
                 );
 
-            // set data as modified
+            // set data as modified (if necessary)
             dynk::setModified<MemorySpace>(dataDV);
             }
         );

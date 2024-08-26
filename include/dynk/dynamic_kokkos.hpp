@@ -25,7 +25,8 @@ namespace dynk {
 namespace impl {
 
 /**
- * @brief Recreate a range execution policy for the requested execution space.
+ * Recreate a range execution policy for the requested execution space.
+ *
  * @tparam ExecutionSpace Requested execution space.
  * @param policy Execution policy to recreate.
  * @return Recreated execution policy.
@@ -36,8 +37,9 @@ auto recreateExecutionPolicy(Kokkos::RangePolicy<> const &policy) {
 }
 
 /**
- * @brief Recreate a simple range execution policy for the requested execution
+ * Recreate a simple range execution policy for the requested execution
  * space.
+ *
  * @tparam ExecutionSpace Requested execution space.
  * @param end Number of elements to work on.
  * @return Recreated execution policy.
@@ -47,8 +49,9 @@ template <typename ExecutionSpace> auto recreateExecutionPolicy(int const end) {
 }
 
 /**
- * @brief Recreate a multi-dimensional range execution policy for the requested
+ * Recreate a multi-dimensional range execution policy for the requested
  * execution space.
+ *
  * @tparam ExecutionSpace Requested execution space.
  * @param policy Execution policy to recreate.
  * @return Recreated execution policy.
@@ -62,8 +65,9 @@ auto recreateExecutionPolicy(Kokkos::MDRangePolicy<Rank> const &policy) {
 } // namespace impl
 
 /**
- * @brief Parallel for that can be executed dynamically on device or on host
+ * Parallel for that can be executed dynamically on device or on host
  * depending on a Boolean parameter.
+ *
  * @tparam ExecutionPolicy Type of the execution policy.
  * @tparam Kernel Type of the kernel.
  * @tparam DeviceExecutionSpace Kokkos execution space for device execution,
@@ -77,11 +81,12 @@ auto recreateExecutionPolicy(Kokkos::MDRangePolicy<Rank> const &policy) {
  * and host execution.
  * @param kernel Kernel to execute withing a Kokkos parallel for region.
  */
-template <typename ExecutionPolicy, typename Kernel,
+template <typename ExecutionPolicy, typename... DualView,  typename Kernel,
           typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
           typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace>
 void parallel_for(bool const isExecutedOnDevice, std::string const &label,
                   ExecutionPolicy const &dummyExecutionPolicy,
+                  DualView&... dualViews,
                   Kernel const &kernel) {
   if (isExecutedOnDevice) {
     // device execution
@@ -98,9 +103,24 @@ void parallel_for(bool const isExecutedOnDevice, std::string const &label,
   }
 }
 
+template<typename ExecutionPolicy, typename DualView, typename Kernel, typename ExecutionSpace, typename MemorySpace>
+void executeFor(std::String const &label, ExecutionSpace const &dummyExecutionPolicy, DualView const& dataDV, Kernel const& kernel) {
+    dataV = dataDV.template view<MemorySpace>();
+    dataDV.template sync<MemorySpace>();
+    auto kokkosKernel = KOKKOS_LAMBDA <typename Args...> (Args... args) {
+        kernel(dataV, args...);
+    };
+    Kokkos::parallel_for(label,
+                         impl::recreateExecutionPolicy<ExecutionSpace>(
+                             dummyExecutionPolicy),
+                         kokkosKernel
+            );
+}
+
 /**
- * @brief Parallel reduce that can be executed dynamically on device or on host
+ * Parallel reduce that can be executed dynamically on device or on host
  * depending on a Boolean parameter.
+ *
  * @tparam ExecutionPolicy Type of the execution policy.
  * @tparam Kernel Type of the kernel.
  * @tparam Reducer Type of the reducers.
