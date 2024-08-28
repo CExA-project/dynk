@@ -15,7 +15,7 @@ struct ParallelForRangeFunctor {
     }
 };
 
-void test_parallel_for_range(bool const isExecutedOnDevice) {
+void test_parallel_for_range_functor(bool const isExecutedOnDevice) {
   using DualView = Kokkos::DualView<int *>;
   DualView dataDV("data", 10);
 
@@ -33,13 +33,13 @@ void test_parallel_for_range(bool const isExecutedOnDevice) {
   EXPECT_EQ(dataDV.h_view(5), 5);
 }
 
-TEST(test_parallel_for, test_range) {
-  test_parallel_for_range(true);
-  test_parallel_for_range(false);
+TEST(test_parallel_for, test_range_functor) {
+  test_parallel_for_range_functor(true);
+  test_parallel_for_range_functor(false);
 }
 
 template <typename ExecutionSpace, typename MemorySpace, typename DualView>
-void doParallelForBlock(DualView &dataDV) {
+void doParallelForFreeFunction(DualView &dataDV) {
     auto dataV = dynk::getView<MemorySpace>(dataDV);
     Kokkos::parallel_for(
         "label", Kokkos::RangePolicy<ExecutionSpace>(0, 10),
@@ -50,22 +50,45 @@ void doParallelForBlock(DualView &dataDV) {
     dynk::setModified<MemorySpace>(dataDV);
 }
 
-void test_parallel_for_range_function(bool const isExecutedOnDevice) {
+void test_parallel_for_range_free_function(bool const isExecutedOnDevice) {
   using DualView = Kokkos::DualView<int *>;
   DualView dataDV("data", 10);
 
   dynk::wrap(
       isExecutedOnDevice, [&]<typename ExecutionSpace, typename MemorySpace>() {
-      doParallelForBlock<ExecutionSpace, MemorySpace>(dataDV);
+      doParallelForFreeFunction<ExecutionSpace, MemorySpace>(dataDV);
       });
 
   dataDV.template sync<typename DualView::host_mirror_space>();
   EXPECT_EQ(dataDV.h_view(5), 5);
 }
 
-TEST(test_parallel_for, test_range_function) {
-  test_parallel_for_range_function(true);
-  test_parallel_for_range_function(false);
+TEST(test_parallel_for, test_range_free_function) {
+  test_parallel_for_range_free_function(true);
+  test_parallel_for_range_free_function(false);
+}
+
+void test_parallel_for_range_free_function_twice(bool const isExecutedOnDevice) {
+  using DualView = Kokkos::DualView<int *>;
+  DualView dataDV("data", 10);
+
+  dynk::wrap(
+      isExecutedOnDevice,
+      [&] () {
+          doParallelForFreeFunction<Kokkos::DefaultExecutionSpace, typename Kokkos::DefaultExecutionSpace::memory_space>(dataDV);
+      },
+      [&] () {
+          doParallelForFreeFunction<Kokkos::DefaultHostExecutionSpace, typename Kokkos::DefaultHostExecutionSpace::memory_space>(dataDV);
+      }
+      );
+
+  dataDV.template sync<typename DualView::host_mirror_space>();
+  EXPECT_EQ(dataDV.h_view(5), 5);
+}
+
+TEST(test_parallel_for, test_range_free_function_twice) {
+  test_parallel_for_range_free_function_twice(true);
+  test_parallel_for_range_free_function_twice(false);
 }
 
 struct ParallelReduceRangeFunctor {
@@ -74,7 +97,7 @@ struct ParallelReduceRangeFunctor {
     }
 };
 
-void test_parallel_reduce_range(bool const isExecutedOnDevice) {
+void test_parallel_reduce_range_functor(bool const isExecutedOnDevice) {
   int value = 0;
   dynk::wrap(
       isExecutedOnDevice, [&]<typename ExecutionSpace, typename MemorySpace>() {
@@ -87,13 +110,13 @@ void test_parallel_reduce_range(bool const isExecutedOnDevice) {
   EXPECT_EQ(value, 10);
 }
 
-TEST(test_parallel_reduce, test_range) {
-  test_parallel_reduce_range(true);
-  test_parallel_reduce_range(false);
+TEST(test_parallel_reduce, test_range_functor) {
+  test_parallel_reduce_range_functor(true);
+  test_parallel_reduce_range_functor(false);
 }
 
 template <typename ExecutionSpace, typename MemorySpace>
-void doParallelReduceBlock(int &value) {
+void doParallelReduceFreeFunction(int &value) {
     Kokkos::parallel_reduce(
         "label", Kokkos::RangePolicy<ExecutionSpace>(0, 10),
         KOKKOS_LAMBDA (int const, int &valueLocal) {
@@ -102,17 +125,37 @@ void doParallelReduceBlock(int &value) {
         value);
 }
 
-void test_parallel_reduce_range_function(bool const isExecutedOnDevice) {
+void test_parallel_reduce_range_free_function(bool const isExecutedOnDevice) {
   int value = 0;
   dynk::wrap(
       isExecutedOnDevice, [&]<typename ExecutionSpace, typename MemorySpace>() {
-      doParallelReduceBlock<ExecutionSpace, MemorySpace>(value);
+      doParallelReduceFreeFunction<ExecutionSpace, MemorySpace>(value);
       });
 
   EXPECT_EQ(value, 10);
 }
 
-TEST(test_parallel_reduce, test_range_function) {
-  test_parallel_reduce_range_function(true);
-  test_parallel_reduce_range_function(false);
+TEST(test_parallel_reduce, test_range_free_function) {
+  test_parallel_reduce_range_free_function(true);
+  test_parallel_reduce_range_free_function(false);
+}
+
+void test_parallel_reduce_range_free_function_twice(bool const isExecutedOnDevice) {
+  int value = 0;
+  dynk::wrap(
+      isExecutedOnDevice,
+      [&] () {
+          doParallelReduceFreeFunction<Kokkos::DefaultExecutionSpace, typename Kokkos::DefaultExecutionSpace::memory_space>(value);
+      },
+      [&] () {
+          doParallelReduceFreeFunction<Kokkos::DefaultHostExecutionSpace, typename Kokkos::DefaultHostExecutionSpace::memory_space>(value);
+      }
+      );
+
+  EXPECT_EQ(value, 10);
+}
+
+TEST(test_parallel_reduce, test_range_free_function_twice) {
+  test_parallel_reduce_range_free_function_twice(true);
+  test_parallel_reduce_range_free_function_twice(false);
 }

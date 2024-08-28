@@ -44,6 +44,37 @@ void wrap(bool const isExecutedOnDevice,
 }
 
 /**
+ * Allow to dynamically launch a parallel block region on device or on host.
+ *
+ * @tparam ParallelLauncher Type of the functor.
+ * @tparam DeviceExecutionSpace Kokkos execution space for device execution,
+ * defaults to Kokkos default execution space.
+ * @tparam DeviceMemorySpace Kokkos memory space for device memory, defaults to
+ * Kokkos default execution space's default memory space.
+ * @tparam HostExecutionSpace Kokkos execution space for host execution,
+ * defaults to Kokkos default host execution space.
+ * @tparam HostMemorySpace Kokkos memory space for host memory, defaults to
+ * Kokkos default host execution space's default memory space.
+ * @param isExecutedOnDevice If `true`, the parallel block region is launched
+ * for execution on the device, otherwise on the host.
+ * @param parallelLauncher Functor to launch that contains a parallel block region.
+ */
+template <typename ParallelLauncherDevice,
+          typename ParallelLauncherHost>
+void wrap(bool const isExecutedOnDevice,
+                   ParallelLauncherDevice const &parallelLauncherDevice,
+                   ParallelLauncherHost const &parallelLauncherHost
+                   ) {
+  if (isExecutedOnDevice) {
+    // launch for device execution
+    parallelLauncherDevice();
+  } else {
+    // launch for host execution
+    parallelLauncherHost();
+  }
+}
+
+/**
  * Get a View of a DualView for the requested memory space.
  *
  * The DualView memory spaces should match with the ones expected. This

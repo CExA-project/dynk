@@ -115,7 +115,7 @@ As using a functor is cumbersome, it's possible to instead define the parallel b
 #include "dynk/wrapper.hpp"
 
 template <typename ExecutionSpace, typename MemorySpace, typename DualView>
-void doSomethingBlock(DualView &dataDV) {
+void doSomethingFreeFunction(DualView &dataDV) {
     // notice the two space template arguments above
 
     // acquire data
@@ -142,7 +142,7 @@ void doSomething() {
         isExecutedOnDevice,
         [&]<typename ExecutionSpace, typename MemorySpace>() {
         // notice the two template arguments above
-        doSomethingBlock(dataDV);
+        doSomethingFreeFunction(dataDV);
         }
         );
 }
@@ -150,7 +150,29 @@ void doSomething() {
 
 In either case, `dynk::wrap` would create two versions of the passed templated lambda: one for the device (with default execution space and default execution space's default memory space), and one for the host (with default host executions space and default host execution space's default memory space).
 Depending on the passed Boolean `isExecutedOnDevice`, the former or the later would be executed.
-Note that the resulting binary would be about twice the size, but this is the price to pay for dynamic execution.
+
+If enabling C++20 is not possible, `dynk::wrap` is overloaded so that it accepts two functions: one for the device execution, one for the host execution.
+There is no need to resort to a templated lambda.
+At this rate however, the helper is just a fancy `if`:
+
+```cpp
+void doSomething() {
+    Kokkos::DualView<int *> dataDV("data", 10);
+    bool isExecutedOnDevice = true;  // can be changed at will
+
+    dynk::wrap(
+        isExecutedOnDevice,
+        [&] () {
+        doSomethingFreeFunction<Kokkos::DefaultExecutionSpace, typename Kokkos::DefaultExecutionSpace::memory_space>(dataDV);
+        },
+        [&] () {
+        doSomethingFreeFunction<Kokkos::DefaultHostExecutionSpace, typename Kokkos::DefaultHostExecutionSpace::memory_space>(dataDV);
+        }
+        );
+}
+```
+
+Note that that in any scenario, the resulting binary would always contain the two compiled functions, and hence may become quite heavy, but this is the price to pay for dynamic execution.
 For more details, please check the documented source code.
 
 The advantage of this approach is its small impact at build time (lightweight library), and the fact that it lets the user do Kokkos code using regular Kokkos functions.
