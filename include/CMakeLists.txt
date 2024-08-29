@@ -6,9 +6,9 @@ add_library(
 target_sources(
     dynk
     INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynk/dynamic_kokkos.hpp>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynk/layer.hpp>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynk/wrapper.hpp>
-        $<INSTALL_INTERFACE:dynk/dynamic_kokkos.hpp>
+        $<INSTALL_INTERFACE:dynk/layer.hpp>
         $<INSTALL_INTERFACE:dynk/wrapper.hpp>
 )
 

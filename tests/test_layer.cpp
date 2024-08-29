@@ -2,7 +2,7 @@
 #include <Kokkos_DualView.hpp>
 #include <gtest/gtest.h>
 
-#include "dynk/dynamic_kokkos.hpp"
+#include "dynk/layer.hpp"
 
 namespace {
 
