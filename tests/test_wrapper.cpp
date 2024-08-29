@@ -15,6 +15,8 @@ struct ParallelForRangeFunctor {
     }
 };
 
+#ifdef ENABLE_CXX20_FEATURES
+
 void test_parallel_for_range_functor(bool const isExecutedOnDevice) {
   using DualView = Kokkos::DualView<int *>;
   DualView dataDV("data", 10);
@@ -38,6 +40,8 @@ TEST(test_parallel_for, test_range_functor) {
   test_parallel_for_range_functor(false);
 }
 
+#endif // ifdef ENABLE_CXX20_FEATURES
+
 template <typename ExecutionSpace, typename MemorySpace, typename DualView>
 void doParallelForFreeFunction(DualView &dataDV) {
     auto dataV = dynk::getView<MemorySpace>(dataDV);
@@ -49,6 +53,8 @@ void doParallelForFreeFunction(DualView &dataDV) {
         );
     dynk::setModified<MemorySpace>(dataDV);
 }
+
+#ifdef ENABLE_CXX20_FEATURES
 
 void test_parallel_for_range_free_function(bool const isExecutedOnDevice) {
   using DualView = Kokkos::DualView<int *>;
@@ -67,6 +73,8 @@ TEST(test_parallel_for, test_range_free_function) {
   test_parallel_for_range_free_function(true);
   test_parallel_for_range_free_function(false);
 }
+
+#endif // ifdef ENABLE_CXX20_FEATURES
 
 void test_parallel_for_range_free_function_twice(bool const isExecutedOnDevice) {
   using DualView = Kokkos::DualView<int *>;
@@ -97,6 +105,8 @@ struct ParallelReduceRangeFunctor {
     }
 };
 
+#ifdef ENABLE_CXX20_FEATURES
+
 void test_parallel_reduce_range_functor(bool const isExecutedOnDevice) {
   int value = 0;
   dynk::wrap(
@@ -115,6 +125,8 @@ TEST(test_parallel_reduce, test_range_functor) {
   test_parallel_reduce_range_functor(false);
 }
 
+#endif // ifdef ENABLE_CXX20_FEATURES
+
 template <typename ExecutionSpace, typename MemorySpace>
 void doParallelReduceFreeFunction(int &value) {
     Kokkos::parallel_reduce(
@@ -124,6 +136,8 @@ void doParallelReduceFreeFunction(int &value) {
         },
         value);
 }
+
+#ifdef ENABLE_CXX20_FEATURES
 
 void test_parallel_reduce_range_free_function(bool const isExecutedOnDevice) {
   int value = 0;
@@ -139,6 +153,8 @@ TEST(test_parallel_reduce, test_range_free_function) {
   test_parallel_reduce_range_free_function(true);
   test_parallel_reduce_range_free_function(false);
 }
+
+#endif // ifdef ENABLE_CXX20_FEATURES
 
 void test_parallel_reduce_range_free_function_twice(bool const isExecutedOnDevice) {
   int value = 0;

@@ -18,6 +18,12 @@ add_executable(
     test_wrapper.cpp
 )
 
+target_compile_definitions(
+    test-wrapper
+    PRIVATE
+        $<IF:$<BOOL:${DYNK_ENABLE_CXX20_FEATURES}>,ENABLE_CXX20_FEATURES,>
+)
+
 target_link_libraries(
     test-wrapper
     Dynk::dynk
