@@ -5,8 +5,8 @@
  * This code proposes helper functions to run parallel block regions on either
  * the device or on the host, the choice being done at runtime. The signature
  * of the familiar `parallel_for` and `parallel_reduce` functions is left
- * similar, the list of paramuments is prepended with a Boolean value, indicating
- * if the code should run on the device (i.e. on
+ * similar, the list of paramuments is prepended with a Boolean value,
+ * indicating if the code should run on the device (i.e. on
  * `Kokkos::DefaultExecutionSpace` by default) or not (i.e. on
  * `Kokkos::DefaultHostExecutionSpace` by default). Note that only the most
  * common uses that appear in the documentation are reproduced.
@@ -18,7 +18,9 @@
 
 #include <string>
 
-#include "Kokkos_Core.hpp"
+#include <Kokkos_Core.hpp>
+
+#include "dynk/dual_view.hpp"
 
 namespace dynk {
 
@@ -81,12 +83,14 @@ auto recreateExecutionPolicy(Kokkos::MDRangePolicy<Rank> const &policy) {
  * and host execution.
  * @param kernel Kernel to execute withing a Kokkos parallel for region.
  */
-template <typename ExecutionPolicy, typename... DualView,  typename Kernel,
-          typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
-          typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace>
+template <
+    typename ExecutionPolicy, typename Kernel,
+    typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
+    typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
+    typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace,
+    typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
 void parallel_for(bool const isExecutedOnDevice, std::string const &label,
                   ExecutionPolicy const &dummyExecutionPolicy,
-                  DualView&... dualViews,
                   Kernel const &kernel) {
   if (isExecutedOnDevice) {
     // device execution
@@ -101,20 +105,6 @@ void parallel_for(bool const isExecutedOnDevice, std::string const &label,
         impl::recreateExecutionPolicy<HostExecutionSpace>(dummyExecutionPolicy),
         kernel);
   }
-}
-
-template<typename ExecutionPolicy, typename DualView, typename Kernel, typename ExecutionSpace, typename MemorySpace>
-void executeFor(std::String const &label, ExecutionSpace const &dummyExecutionPolicy, DualView const& dataDV, Kernel const& kernel) {
-    dataV = dataDV.template view<MemorySpace>();
-    dataDV.template sync<MemorySpace>();
-    auto kokkosKernel = KOKKOS_LAMBDA <typename Args...> (Args... args) {
-        kernel(dataV, args...);
-    };
-    Kokkos::parallel_for(label,
-                         impl::recreateExecutionPolicy<ExecutionSpace>(
-                             dummyExecutionPolicy),
-                         kokkosKernel
-            );
 }
 
 /**
@@ -135,9 +125,12 @@ void executeFor(std::String const &label, ExecutionSpace const &dummyExecutionPo
  * and host execution.
  * @param kernel Kernel to execute withing a Kokkos parallel for region.
  */
-template <typename ExecutionPolicy, typename Kernel, typename... Reducer,
-          typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
-          typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace>
+template <
+    typename ExecutionPolicy, typename Kernel, typename... Reducer,
+    typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
+    typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
+    typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace,
+    typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
 void parallel_reduce(bool const isExecutedOnDevice, std::string const &label,
                      ExecutionPolicy const &dummyExecutionPolicy,
                      Kernel const &kernel, Reducer &... reducers) {

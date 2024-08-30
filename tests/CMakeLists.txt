@@ -1,16 +1,16 @@
 add_executable(
-    test-dynk
+    test-layer
     main.cpp
-    test_dynk.cpp
+    test_layer.cpp
 )
 
 target_link_libraries(
-    test-dynk
+    test-layer
     Dynk::dynk
     GTest::gtest
 )
 
-gtest_discover_tests(test-dynk)
+gtest_discover_tests(test-layer)
 
 add_executable(
     test-wrapper

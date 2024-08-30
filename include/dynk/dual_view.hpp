@@ -22,6 +22,15 @@ auto getView(DualView &dualView) {
   return dualView.template view<MemorySpace>();
 }
 
+template <typename T, typename... P, typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space, typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
+Kokkos::View<T, Kokkos::AnonymousSpace, P...> getViewAnonymous(Kokkos::DualView<T, P...>& dualView, bool const isExecutedOnDevice) {
+    if (isExecutedOnDevice) {
+        return getView<DeviceMemorySpace>(dualView);
+    } else {
+        return getView<HostMemorySpace>(dualView);
+    }
+}
+
 /**
  * Get a View of a DualView for the requested memory space which is
  * synchronized if needed.
