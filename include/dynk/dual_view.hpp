@@ -22,13 +22,18 @@ auto getView(DualView &dualView) {
   return dualView.template view<MemorySpace>();
 }
 
-template <typename T, typename... P, typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space, typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
-Kokkos::View<T, Kokkos::AnonymousSpace, P...> getViewAnonymous(Kokkos::DualView<T, P...>& dualView, bool const isExecutedOnDevice) {
-    if (isExecutedOnDevice) {
-        return getView<DeviceMemorySpace>(dualView);
-    } else {
-        return getView<HostMemorySpace>(dualView);
-    }
+template <
+    typename T, typename... P,
+    typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
+    typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
+Kokkos::View<T, Kokkos::AnonymousSpace, P...>
+getViewAnonymous(Kokkos::DualView<T, P...> &dualView,
+                 bool const isExecutedOnDevice) {
+  if (isExecutedOnDevice) {
+    return getView<DeviceMemorySpace>(dualView);
+  } else {
+    return getView<HostMemorySpace>(dualView);
+  }
 }
 
 /**
@@ -78,7 +83,10 @@ void setModified(DualView &dualView) {
  * @param isExecutedOnDevice If `true`, mark device view as modified, otherwise
  * mark host view as modified.
  */
-template <typename DualView, typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space, typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
+template <
+    typename DualView,
+    typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
+    typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
 void setModified(DualView &dualView, bool const isExecutedOnDevice) {
   if (isExecutedOnDevice) {
     setModified<DeviceMemorySpace>(dualView);

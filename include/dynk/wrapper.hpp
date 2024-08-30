@@ -22,27 +22,28 @@ namespace dynk {
  * Kokkos default host execution space's default memory space.
  * @param isExecutedOnDevice If `true`, the parallel block region is launched
  * for execution on the device, otherwise on the host.
- * @param parallelLauncher Functor to launch that contains a parallel block region.
+ * @param parallelLauncher Functor to launch that contains a parallel block
+ * region.
  */
-template <typename ParallelLauncher,
-          typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
-          typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
-          typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace,
-          typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
+template <
+    typename ParallelLauncher,
+    typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
+    typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
+    typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace,
+    typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
 void wrap(bool const isExecutedOnDevice,
-                   ParallelLauncher const &parallelLauncher) {
+          ParallelLauncher const &parallelLauncher) {
   // NOTE: Beware the ugly syntax below! We're calling a templated functor, for
   // which the parenthesis operator is actually templated, hence the need to
   // exhibit the call to `operator()`. As the operator is a method of the
   // object, the `template` keyword is needed to understand the `<>` syntax.
   if (isExecutedOnDevice) {
     // launch for device execution
-    parallelLauncher.template operator()<
-        DeviceExecutionSpace, DeviceMemorySpace>();
+    parallelLauncher
+        .template operator()<DeviceExecutionSpace, DeviceMemorySpace>();
   } else {
     // launch for host execution
-    parallelLauncher.template
-    operator()<HostExecutionSpace, HostMemorySpace>();
+    parallelLauncher.template operator()<HostExecutionSpace, HostMemorySpace>();
   }
 }
 
@@ -59,12 +60,10 @@ void wrap(bool const isExecutedOnDevice,
  * @param parallelLauncherHost Host launcher functor that contains a parallel
  * block region.
  */
-template <typename ParallelLauncherDevice,
-          typename ParallelLauncherHost>
+template <typename ParallelLauncherDevice, typename ParallelLauncherHost>
 void wrap(bool const isExecutedOnDevice,
-                   ParallelLauncherDevice const &parallelLauncherDevice,
-                   ParallelLauncherHost const &parallelLauncherHost
-                   ) {
+          ParallelLauncherDevice const &parallelLauncherDevice,
+          ParallelLauncherHost const &parallelLauncherHost) {
   if (isExecutedOnDevice) {
     // launch for device execution
     parallelLauncherDevice();
