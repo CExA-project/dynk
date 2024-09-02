@@ -10,3 +10,10 @@ else()
     set(CMAKE_CXX_STANDARD 17)
 endif()
 
+option(DYNK_ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA "Allow to have an extended lambda defined inside a generic lambda, requires C++20")
+
+if(DYNK_ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA)
+    if(NOT DYNK_ENABLE_CXX20_FEATURES)
+        message(FATAL_ERROR "Extended lambda in generic lambda feature requires C++20 standard enabled")
+    endif()
+endif()

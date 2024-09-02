@@ -4,6 +4,34 @@
 
 #include "dynk/wrapper.hpp"
 
+#if defined(ENABLE_CXX20_FEATURES) && defined(ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA)
+
+void test_parallel_for_range_lambda(bool const isExecutedOnDevice) {
+  using DualView = Kokkos::DualView<int *>;
+  DualView dataDV("data", 10);
+
+  dynk::wrap(
+      isExecutedOnDevice, [&]<typename ExecutionSpace, typename MemorySpace>() {
+        auto dataV = dynk::getView<MemorySpace>(dataDV);
+        Kokkos::parallel_for("label",
+                             Kokkos::RangePolicy<ExecutionSpace>(0, 10),
+                             KOKKOS_LAMBDA (int const i) {
+                             mDataV(i) = i;
+                             });
+        dynk::setModified<MemorySpace>(dataDV);
+      });
+
+  dataDV.template sync<typename DualView::host_mirror_space>();
+  EXPECT_EQ(dataDV.h_view(5), 5);
+}
+
+TEST(test_parallel_for, test_range_lambda) {
+  test_parallel_for_range_lambda(true);
+  test_parallel_for_range_lambda(false);
+}
+
+#endif // if defined(ENABLE_CXX20_FEATURES) && defined(ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA)
+
 template <typename View> struct ParallelForRangeFunctor {
   View mDataV;
 

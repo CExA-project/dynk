@@ -22,6 +22,7 @@ target_compile_definitions(
     test-wrapper
     PRIVATE
         $<IF:$<BOOL:${DYNK_ENABLE_CXX20_FEATURES}>,ENABLE_CXX20_FEATURES,>
+        $<IF:$<BOOL:${DYNK_ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA}>,ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA,>
 )
 
 target_link_libraries(
