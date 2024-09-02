@@ -64,6 +64,8 @@ The library offers the *wrapper* approach and the *parallel functions* approach.
 With this approach, you would wrap your data access and your parallel block construct in the `dynk::wrap` function:
 
 ```cpp
+#include <Kokkos_Core.hpp>
+#include <Kokkos_DualView.hpp>
 #include "dynk/wrapper.hpp"
 
 template <typename View>
@@ -180,10 +182,39 @@ When the dynamic approach is not desired anymore in the user's code, it would be
 On the other hand, the disadvantage is the C++20 requirement and the obligation, at least for now, to split the code between its kernel, or its parallel block, and the rest.
 This scatterisation of the code makes it less readable.
 
-### Parallel functions approach
+### Layer approach
 
-The signature of the familiar `parallel_for` and `parallel_reduce` functions is left similar, the list of arguments is prepended with a Boolean value, indicating if the code should run on the device or not.
-Note that only the most common uses that appear in the documentation are reproduced.
+The layer approach aims to propose alternate versions of the `parallel_for` and `parallel_reduce` functions, with a similar signature.
+The list of arguments is prepended with a Boolean value, indicating if the code should run on the device or not.
+Note that this approach requires to reimplement Kokkos feature and is *difficult to maintain* for the long run.
+Only the most common uses that appear in the documentation are reproduced.
+
+In your C++ files, you would replace your existing `parallel_for` or `parallel_reduce` by their equivalent from dynk:
+
+```cpp
+#include <Kokkos_Core.hpp>
+#include <Kokkos_DualView.hpp>
+#include "dynk/dynamic_kokkos.hpp"
+
+void doSomething() {
+    Kokkos::DualView<int *> dataDV("data", 10);
+    bool isExecutedOnDevice = true;  // can be changed at will
+
+    auto dataV = dynk::getViewAnonymous(dataDV, isExecutedOnDevice);
+    dynk::parallel_for(
+        isExecutedOnDevice, "label", Kokkos::RangePolicy(0, 10),
+        KOKKOS_LAMBDA (int const i) {
+        dataV(i) = i;
+        }
+        );
+    dynk::setModified(dataDV, isExecutedOnDevice);
+}
+```
+
+This approach requires to replace the `Kokkos` namespace of the parallel construct by `dynk`, and add the boolean as its first argument.
+Accessing the right View from a DualView is made with the `dynk::getViewAnonymous` function, that returns a Kokkos View in an `Kokkos::AnonymousSpace`.
+This type of View has no known memory space at compile time, which is define by affectation dynamically.
+Please note that this feature, though available in Kokkos, is *not documented*.
 
 #### What is supported so far
 
@@ -194,20 +225,3 @@ Note that only the most common uses that appear in the documentation are reprodu
   - `RangePolicy`
   - Implicit `RangePolicy` with only the number of elements
   - `MDRangePolicy`
-
-In your C++ files, you would replace your existing `parallel_for` or `parallel_reduce` by their equivalent from dynk:
-
-```cpp
-#include "dynk/dynamic_kokkos.hpp"
-
-...
-
-bool isExecutableOnDevice = true;
-dynk::parallel_for(
-  isExecutedOnDevice, "my label", Kokkos::RangePolicy(0, 10),
-  KOKKOS_LAMBDA(int const i) {
-    Kokkos::printf("hello from %i\n", i);
-  });
-```
-
-All you have to do is replace the `Kokkos` namespace of the parallel construct by `dynk`, and add the boolean as its first argument.
