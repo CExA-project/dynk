@@ -19,4 +19,4 @@ if(DYNK_ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA)
 endif()
 
 # allow gtest to discover tests
-option(DYNK_ENABLE_GTEST_DISCOVER_TESTS "Enable Gtest to discover tests by attempting to run them")
+option(DYNK_ENABLE_GTEST_DISCOVER_TESTS "Enable Gtest to discover tests by attempting to run them" ON)
