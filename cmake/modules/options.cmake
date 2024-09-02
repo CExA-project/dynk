@@ -17,3 +17,6 @@ if(DYNK_ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA)
         message(FATAL_ERROR "Extended lambda in generic lambda feature requires C++20 standard enabled")
     endif()
 endif()
+
+# allow gtest to discover tests
+option(DYNK_ENABLE_GTEST_DISCOVER_TESTS "Enable Gtest to discover tests by attempting to run them")

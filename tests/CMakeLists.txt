@@ -10,7 +10,9 @@ target_link_libraries(
     GTest::gtest
 )
 
-gtest_discover_tests(test-layer)
+if(DYNK_ENABLE_GTEST_DISCOVER_TESTS)
+    gtest_discover_tests(test-layer)
+endif()
 
 add_executable(
     test-wrapper
@@ -31,4 +33,6 @@ target_link_libraries(
     GTest::gtest
 )
 
-gtest_discover_tests(test-wrapper)
+if(DYNK_ENABLE_GTEST_DISCOVER_TESTS)
+    gtest_discover_tests(test-wrapper)
+endif()
