@@ -16,7 +16,7 @@ void test_parallel_for_range_lambda(bool const isExecutedOnDevice) {
         Kokkos::parallel_for("label",
                              Kokkos::RangePolicy<ExecutionSpace>(0, 10),
                              KOKKOS_LAMBDA (int const i) {
-                             mDataV(i) = i;
+                             dataV(i) = i;
                              });
         dynk::setModified<MemorySpace>(dataDV);
       });
