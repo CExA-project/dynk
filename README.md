@@ -58,10 +58,75 @@ Alternatively, you can also copy `include/dynk` in your project and start using 
 ## Use
 
 The library offers the *wrapper* approach and the *parallel functions* approach.
+Here is the breakdown of their support:
+
+| Backend | Compiler | Minimum version | Layer              | Wrapper `if`       | Wrapper 2 functions | Wrapper function   | Wrapper functor    | Wrapper lambda     |
+|---------|----------|-----------------|--------------------|--------------------|---------------------|--------------------|--------------------|--------------------|
+| CUDA    | NVCC     |                 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: | :x:                |
+| CUDA    | Clang    |                 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| HIP     | ROCm     | 5.5.1           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| SYCL    | Intel    | 2024.0.2        | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+
+Note that that in any approach, the resulting binary would always contain the two compiled kernels, and hence may become quite heavy, but this is the price to pay for dynamic execution.
+For more details, please check the documented source code.
 
 ### Wrapper approach
 
+#### Wrapper lambda approach
+
 With this approach, you would wrap your data access and your parallel block construct in the `dynk::wrap` function:
+
+```cpp
+#include <Kokkos_Core.hpp>
+#include <Kokkos_DualView.hpp>
+#include "dynk/wrapper.hpp"
+
+void doSomething() {
+    Kokkos::DualView<int *> dataDV("data", 10);
+    bool isExecutedOnDevice = true;  // can be changed at will
+
+    dynk::wrap(
+        isExecutedOnDevice,
+        [&]<typename ExecutionSpace, typename MemorySpace>() {
+            // notice the two template arguments above
+
+            // acquire data
+            auto dataV = dynk::getView<MemorySpace>(dataDV);
+
+            // usual parallel for
+            Kokkos::parallel_for(
+                "label",
+                Kokkos::RangePolicy<ExecutionSpace>(0, 10),
+                KOKKOS_LAMBDA (int const i) {
+                    dataV(i) = i;
+                }
+                );
+
+            // set data as modified (if necessary)
+            dynk::setModified<MemorySpace>(dataDV);
+            }
+        );
+}
+```
+
+With this approach, we have two lambdas: one, templated for the execution space and memory space, that contains the parallel block and the data management, and the other which is a classic Kokkos lambda.
+Note that templated lambdas are only available with C++20.
+By default, the CMake configuration sets the language standard accordingly, this can be disabled with the CMake option `DYNK_ENABLE_CXX20_FEATURES`.
+
+`dynk::wrap` would create two versions of the passed templated lambda: one for the device (with default execution space and default execution space's default memory space), and one for the host (with default host executions space and default host execution space's default memory space).
+Depending on the passed Boolean `isExecutedOnDevice`, the former or the later would be executed.
+
+The advantage of this approach is its small impact at build time (lightweight library), and the fact that it lets the user do Kokkos code using regular Kokkos functions.
+When the dynamic approach is not desired anymore in the user's code, it would be pretty easy to get rid of the library and obtain a plain Kokkos code.
+On the other hand, the disadvantage is the C++20 requirement and the obligation, at least for now, to split the code between its kernel, or its parallel block, and the rest.
+This scatterisation of the code makes it less readable.
+
+This approach works with Clang, ROCm and the Intel LLVM compiler.
+However, this does not work with NVCC, as of Cuda 12.5: is not possible to define an extended lambda (i.e. a lambda with attributes `__host__ __device__`) within a generic lambda (i.e. a templated lambda) with this compiler.
+
+For that, we propose a derived approach.
+
+#### Wrapper functor approach
 
 ```cpp
 #include <Kokkos_Core.hpp>
@@ -105,13 +170,14 @@ void doSomething() {
 }
 ```
 
-Note the use of a templated lambda, which is only available with C++20, that contains the parallel block and the data preparation.
-By default, the CMake configuration sets the language standard accordingly, which can be disabled with the CMake option `DYNK_ENABLE_WRAPPER`.
+Note that the Kokkos kernel is supplied as a functor now.
+This works with NVCC.
 
-Note that the Kokkos kernel is supplied as a functor.
-Due to Cuda limitations, as of Cuda 12.5, it is not possible to define an extended lambda (i.e. a lambda with attributes `__host__ __device__`) within a generic lambda (i.e. a templated lambda).
+As using a functor is cumbersome another approach is possible.
 
-As using a functor is cumbersome, it's possible to instead define the parallel block and the data preparation in a templated free function, where the Kokkos kernel is supplied as a regular lambda:
+#### Wrapper function approach
+
+It is possible to define the parallel block and the data management in a templated free function, where the Kokkos kernel is supplied as a regular lambda:
 
 ```cpp
 #include "dynk/wrapper.hpp"
@@ -150,8 +216,7 @@ void doSomething() {
 }
 ```
 
-In either case, `dynk::wrap` would create two versions of the passed templated lambda: one for the device (with default execution space and default execution space's default memory space), and one for the host (with default host executions space and default host execution space's default memory space).
-Depending on the passed Boolean `isExecutedOnDevice`, the former or the later would be executed.
+#### Wrapper two functions approach
 
 If enabling C++20 is not possible, `dynk::wrap` is overloaded so that it accepts two functions: one for the device execution, one for the host execution.
 There is no need to resort to a templated lambda.
@@ -174,14 +239,6 @@ void doSomething() {
 }
 ```
 
-Note that that in any scenario, the resulting binary would always contain the two compiled functions, and hence may become quite heavy, but this is the price to pay for dynamic execution.
-For more details, please check the documented source code.
-
-The advantage of this approach is its small impact at build time (lightweight library), and the fact that it lets the user do Kokkos code using regular Kokkos functions.
-When the dynamic approach is not desired anymore in the user's code, it would be pretty easy to get rid of the library and obtain a plain Kokkos code.
-On the other hand, the disadvantage is the C++20 requirement and the obligation, at least for now, to split the code between its kernel, or its parallel block, and the rest.
-This scatterisation of the code makes it less readable.
-
 ### Layer approach
 
 The layer approach aims to propose alternate versions of the `parallel_for` and `parallel_reduce` functions, with a similar signature.
@@ -200,21 +257,26 @@ void doSomething() {
     Kokkos::DualView<int *> dataDV("data", 10);
     bool isExecutedOnDevice = true;  // can be changed at will
 
+    // acquire data
     auto dataV = dynk::getViewAnonymous(dataDV, isExecutedOnDevice);
+
+    // modified parallel for
     dynk::parallel_for(
         isExecutedOnDevice, "label", Kokkos::RangePolicy(0, 10),
         KOKKOS_LAMBDA (int const i) {
         dataV(i) = i;
         }
         );
+
+    // set data as modified (if necessary)
     dynk::setModified(dataDV, isExecutedOnDevice);
 }
 ```
 
-This approach requires to replace the `Kokkos` namespace of the parallel construct by `dynk`, and add the boolean as its first argument.
+This approach requires to replace the `Kokkos` namespace of the parallel construct by `dynk`, and to add the Boolean value as its first argument.
 Accessing the right View from a DualView is made with the `dynk::getViewAnonymous` function, that returns a Kokkos View in an `Kokkos::AnonymousSpace`.
-This type of View has no known memory space at compile time, which is define by affectation dynamically.
-Please note that this feature, though available in Kokkos, is *not documented*.
+This type of View has no known memory space at compile time, it is defined by affectation dynamically during runtime.
+Please note that this feature, though available in the public Kokkos API, is *not documented*.
 
 #### What is supported so far
 
