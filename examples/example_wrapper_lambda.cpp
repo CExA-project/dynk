@@ -16,7 +16,7 @@ TestArray<T>& TestArray<T>::operator+=(TestArray<T> const& other) {
             Kokkos::parallel_for(
                     "perform += for test array",
                     Kokkos::RangePolicy<ES>(0, size()),
-                    KOKKOS_CLASS_LAMBDA (int const i) { mDataV(i) += mOtherV(i); }
+                    KOKKOS_CLASS_LAMBDA (int const i) { dataV(i) += otherV(i); }
                     );
             dynk::setModified<MS>(mData);
             }
