@@ -23,6 +23,22 @@ auto getView(DualView &dualView) {
   return dualView.template view<MemorySpace>();
 }
 
+/**
+ * Get a View of a DualView dynamically.
+ *
+ * The DualView memory spaces should match with the ones expected.
+ *
+ * @tparam T Type of the DualView.
+ * @tparam P Parameters of the DualView.
+ * @tparam DeviceMemorySpace Device memory space, defaults to the default
+ * execution space's default memory space.
+ * @tparam HostMemorySpace Host memory space, defaults to the default host
+ * execution space's default memory space.
+ * @param dualView DualView to take a view from.
+ * @param isExecutedOnDevice If `true`, returns the device view, otherwise,
+ * returns the host view.
+ * @return View in the requested memory space.
+ */
 template <
     typename T, typename... P,
     typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
@@ -37,6 +53,22 @@ getViewAnonymous(Kokkos::DualView<T, P...> &dualView,
   }
 }
 
+/**
+ * Get a constant View of a constant DualView dynamically.
+ *
+ * The DualView memory spaces should match with the ones expected.
+ *
+ * @tparam T Type of the DualView.
+ * @tparam P Parameters of the DualView.
+ * @tparam DeviceMemorySpace Device memory space, defaults to the default
+ * execution space's default memory space.
+ * @tparam HostMemorySpace Host memory space, defaults to the default host
+ * execution space's default memory space.
+ * @param dualView DualView to take a view from.
+ * @param isExecutedOnDevice If `true`, returns the device view, otherwise,
+ * returns the host view.
+ * @return View in the requested memory space.
+ */
 template <
     typename T, typename... P,
     typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
