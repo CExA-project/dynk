@@ -57,8 +57,8 @@ Alternatively, you can also copy `include/dynk` in your project and start using 
 
 ## Use
 
-The library offers the *wrapper* approach and the *parallel functions* approach.
-Here is the breakdown of their support:
+The library offers the *layer* approach and the *wrapper* approach.
+Here is the breakdown of their support (also for their sub-approaches):
 
 | Backend | Compiler | Minimum version | Layer              | Wrapper `if`       | Wrapper 2 functions | Wrapper function   | Wrapper functor    | Wrapper lambda     |
 |---------|----------|-----------------|--------------------|--------------------|---------------------|--------------------|--------------------|--------------------|
