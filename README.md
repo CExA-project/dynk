@@ -118,8 +118,7 @@ Depending on the passed Boolean `isExecutedOnDevice`, the former or the later wo
 
 The advantage of this approach is its small impact at build time (lightweight library), and the fact that it lets the user do Kokkos code using regular Kokkos functions.
 When the dynamic approach is not desired anymore in the user's code, it would be pretty easy to get rid of the library and obtain a plain Kokkos code.
-On the other hand, the disadvantage is the C++20 requirement and the obligation, at least for now, to split the code between its kernel, or its parallel block, and the rest.
-This scatterisation of the code makes it less readable.
+On the other hand, the disadvantage is the C++20 requirement and its lack of support with NVCC.
 
 This approach works with Clang, ROCm and the Intel LLVM compiler.
 However, this does not work with NVCC, as of Cuda 12.5: is not possible to define an extended lambda (i.e. a lambda with attributes `__host__ __device__`) within a generic lambda (i.e. a templated lambda) with this compiler.
