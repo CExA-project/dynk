@@ -215,6 +215,8 @@ void doSomething() {
 }
 ```
 
+This still requires to scatter the code, which makes it less readable.
+
 #### Wrapper two functions approach
 
 If enabling C++20 is not possible, `dynk::wrap` is overloaded so that it accepts two functions: one for the device execution, one for the host execution.
