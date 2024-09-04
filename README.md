@@ -60,12 +60,14 @@ Alternatively, you can also copy `include/dynk` in your project and start using 
 The library offers the *layer* approach and the *wrapper* approach.
 Here is the breakdown of their support (also for their sub-approaches):
 
-| Backend | Compiler | Minimum version | Layer              | Wrapper `if`       | Wrapper 2 functions | Wrapper function   | Wrapper functor    | Wrapper lambda     |
-|---------|----------|-----------------|--------------------|--------------------|---------------------|--------------------|--------------------|--------------------|
-| CUDA    | NVCC     |                 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: | :x:                |
-| CUDA    | Clang    |                 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| HIP     | ROCm     | 5.5.1           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| SYCL    | Intel    | 2024.0.2        | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Backend | Compiler | Minimum version | Layer              | Wrapper `if`       | Wrapper 2 functions | Wrapper function | Wrapper functor | Wrapper lambda |
+|---------|----------|-----------------|--------------------|--------------------|---------------------|------------------|-----------------|----------------|
+| CUDA    | NVCC     |                 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :warning:        | :warning:       | :x:            |
+| CUDA    | Clang    |                 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :warning:        | :warning:       | :warning:      |
+| HIP     | ROCm     | 5.5.1           | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :warning:        | :warning:       | :warning:      |
+| SYCL    | Intel    | 2024.0.2        | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark:  | :warning:        | :warning:       | :warning:      |
+
+Where :warning: means C++20 required, and :x: cannot be built.
 
 Note that that in any approach, the resulting binary would always contain the two compiled kernels, and hence may become quite heavy, but this is the price to pay for dynamic execution.
 For more details, please check the documented source code.
