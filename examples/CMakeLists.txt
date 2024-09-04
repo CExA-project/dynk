@@ -1,62 +1,62 @@
 add_executable(
-    example-layer
-    example_layer.cpp
+    example-1-layer
+    example_1_layer.cpp
 )
 
 target_link_libraries(
-    example-layer
+    example-1-layer
     Dynk::dynk
 )
 
 add_executable(
-    example-if-function-twice
-    example_if_function_twice.cpp
+    example-2-wrapper-if
+    example_2_wrapper_if.cpp
 )
 
 target_link_libraries(
-    example-if-function-twice
+    example-2-wrapper-if
     Dynk::dynk
 )
 
 add_executable(
-    example-wrapper-function-twice
-    example_wrapper_function_twice.cpp
+    example-3-wrapper-2-functions
+    example_3_wrapper_2_functions.cpp
 )
 
 target_link_libraries(
-    example-wrapper-function-twice
+    example-3-wrapper-2-functions
     Dynk::dynk
 )
 
 if(DYNK_ENABLE_CXX20_FEATURES)
     add_executable(
-        example-wrapper-functor
-        example_wrapper_functor.cpp
+        example-4-wrapper-function
+        example_4_wrapper_function.cpp
     )
 
     target_link_libraries(
-        example-wrapper-functor
+        example-4-wrapper-function
         Dynk::dynk
     )
 
     add_executable(
-        example-wrapper-function
-        example_wrapper_function.cpp
+        example-5-wrapper-functor
+        example_5_wrapper_functor.cpp
     )
 
     target_link_libraries(
-        example-wrapper-function
+        example-5-wrapper-functor
         Dynk::dynk
     )
 
     if(DYNK_ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA)
         add_executable(
-            example-wrapper-lambda
-            example_wrapper_lambda.cpp
+            example-6-wrapper-lambda
+            example_6_wrapper_lambda.cpp
         )
 
         target_link_libraries(
-            example-wrapper-lambda
+            example-6-wrapper-lambda
             Dynk::dynk
         )
     endif()
