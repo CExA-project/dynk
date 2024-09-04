@@ -28,6 +28,26 @@ target_link_libraries(
 )
 ```
 
+### With FetchContent
+
+In your main CMake file:
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+    dynk
+    GIT_REPOSITORY https://github.com/CExA-project/dynk.git
+    GIT_TAG master
+)
+FetchContent_MakeAvailable(dynk)
+
+target_link_libraries(
+    my-lib
+    PRIVATE
+        Dynk::dynk
+)
+```
+
 #### As a locally available dependency
 
 Get, then install the project:
@@ -54,6 +74,17 @@ target_link_libraries(
 ### Copy files
 
 Alternatively, you can also copy `include/dynk` in your project and start using it.
+
+## Tests
+
+You can build tests with the CMake option `DYNK_ENABLE_TESTS`, and run them with `ctest`.
+
+If you don't have a GPU available when compiling, you have to disable the CMake option `DYNK_ENABLE_GTEST_DISCOVER_TESTS`.
+
+## Examples
+
+You can build examples with the CMake option `DYNK_ENABLE_EXAMPLES`.
+They should be run individually.
 
 ## Use
 
@@ -124,6 +155,7 @@ On the other hand, the disadvantage is the C++20 requirement and its lack of sup
 
 This approach works with Clang, ROCm and the Intel LLVM compiler.
 However, this does not work with NVCC, as of Cuda 12.5: is not possible to define an extended lambda (i.e. a lambda with attributes `__host__ __device__`) within a generic lambda (i.e. a templated lambda) with this compiler.
+By default, the CMake configuration allows to build test cases using this feature, this can be disabled with the CMake option `DYNK_ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA`.
 
 For that, we propose a derived approach.
 
@@ -219,11 +251,10 @@ void doSomething() {
 
 This still requires to scatter the code, which makes it less readable.
 
-#### Wrapper two functions approach
+#### Wrapper 2 functions approach
 
 If enabling C++20 is not possible, `dynk::wrap` is overloaded so that it accepts two functions: one for the device execution, one for the host execution.
-There is no need to resort to a templated lambda.
-At this rate however, the helper is just a fancy `if`:
+There is no need to resort to a templated lambda anymore.
 
 ```cpp
 void doSomething() {
@@ -239,6 +270,25 @@ void doSomething() {
         doSomethingFreeFunction<Kokkos::DefaultHostExecutionSpace, typename Kokkos::DefaultHostExecutionSpace::memory_space>(dataDV);
         }
         );
+}
+```
+
+At this rate however, the helper is just a fancy `if`.
+
+#### Wrapper `if` approach
+
+Just ditching the `dynk::wrap` and the extra lambdas:
+
+```cpp
+void doSomething() {
+    Kokkos::DualView<int *> dataDV("data", 10);
+    bool isExecutedOnDevice = true;  // can be changed at will
+
+    if (isExecutedOnDevice) {
+        doSomethingFreeFunction<Kokkos::DefaultExecutionSpace, typename Kokkos::DefaultExecutionSpace::memory_space>(dataDV);
+    else {
+        doSomethingFreeFunction<Kokkos::DefaultHostExecutionSpace, typename Kokkos::DefaultHostExecutionSpace::memory_space>(dataDV);
+    }
 }
 ```
 
