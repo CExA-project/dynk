@@ -74,7 +74,7 @@ template <
     typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
     typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
 Kokkos::View<T, Kokkos::AnonymousSpace, P...>
-getViewAnonymous(Kokkos::DualView<T, P...> const& dualView,
+getViewAnonymous(Kokkos::DualView<T, P...> const &dualView,
                  bool const isExecutedOnDevice) {
   if (isExecutedOnDevice) {
     return getView<DeviceMemorySpace>(dualView);

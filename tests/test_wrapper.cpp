@@ -4,7 +4,8 @@
 
 #include "dynk/wrapper.hpp"
 
-#if defined(ENABLE_CXX20_FEATURES) && defined(ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA)
+#if defined(ENABLE_CXX20_FEATURES) &&                                          \
+    defined(ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA)
 
 void test_parallel_for_range_lambda(bool const isExecutedOnDevice) {
   using DualView = Kokkos::DualView<int *>;
@@ -13,11 +14,9 @@ void test_parallel_for_range_lambda(bool const isExecutedOnDevice) {
   dynk::wrap(
       isExecutedOnDevice, [&]<typename ExecutionSpace, typename MemorySpace>() {
         auto dataV = dynk::getView<MemorySpace>(dataDV);
-        Kokkos::parallel_for("label",
-                             Kokkos::RangePolicy<ExecutionSpace>(0, 10),
-                             KOKKOS_LAMBDA (int const i) {
-                             dataV(i) = i;
-                             });
+        Kokkos::parallel_for(
+            "label", Kokkos::RangePolicy<ExecutionSpace>(0, 10),
+            KOKKOS_LAMBDA(int const i) { dataV(i) = i; });
         dynk::setModified<MemorySpace>(dataDV);
       });
 
@@ -30,7 +29,8 @@ TEST(test_parallel_for, test_range_lambda) {
   test_parallel_for_range_lambda(false);
 }
 
-#endif // if defined(ENABLE_CXX20_FEATURES) && defined(ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA)
+#endif // if defined(ENABLE_CXX20_FEATURES) &&
+       // defined(ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA)
 
 template <typename View> struct ParallelForRangeFunctor {
   View mDataV;
