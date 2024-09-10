@@ -36,8 +36,7 @@ In your main CMake file:
 include(FetchContent)
 FetchContent_Declare(
     dynk
-    GIT_REPOSITORY https://github.com/CExA-project/dynk.git
-    GIT_TAG master
+    URL https://github.com/CExA-project/dynk/archive/refs/tags/0.1.0.tar.gz
 )
 FetchContent_MakeAvailable(dynk)
 
