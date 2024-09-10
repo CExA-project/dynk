@@ -133,7 +133,7 @@ template <
     typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
 void parallel_reduce(bool const isExecutedOnDevice, std::string const &label,
                      ExecutionPolicy const &dummyExecutionPolicy,
-                     Kernel const &kernel, Reducer &... reducers) {
+                     Kernel const &kernel, Reducer &...reducers) {
   if (isExecutedOnDevice) {
     // device execution
     Kokkos::parallel_reduce(label,

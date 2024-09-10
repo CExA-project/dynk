@@ -18,9 +18,9 @@ template <typename T>
 TestArray<T> &TestArray<T>::operator+=(TestArray<T> const &other) {
   bool isExecutedOnDevice = true;
 
-  dynk::wrap(
-      isExecutedOnDevice,
-      [&]<typename ES, typename MS>() { plusEqual<ES, MS>(*this, other); });
+  dynk::wrap(isExecutedOnDevice, [&]<typename ES, typename MS>() {
+    plusEqual<ES, MS>(*this, other);
+  });
 
   return *this;
 }

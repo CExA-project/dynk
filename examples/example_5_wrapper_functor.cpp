@@ -20,15 +20,14 @@ template <typename T>
 TestArray<T> &TestArray<T>::operator+=(TestArray<T> const &other) {
   bool isExecutedOnDevice = true;
 
-  dynk::wrap(
-      isExecutedOnDevice, [&]<typename ES, typename MS>() {
-        auto dataV = dynk::getView<MS>(mData);
-        auto otherV = dynk::getView<MS>(other.mData);
-        Kokkos::parallel_for("perform += for test array",
-                             Kokkos::RangePolicy<ES>(0, size()),
-                             PlusEqualFunctor(dataV, otherV));
-        dynk::setModified<MS>(mData);
-      });
+  dynk::wrap(isExecutedOnDevice, [&]<typename ES, typename MS>() {
+    auto dataV = dynk::getView<MS>(mData);
+    auto otherV = dynk::getView<MS>(other.mData);
+    Kokkos::parallel_for("perform += for test array",
+                         Kokkos::RangePolicy<ES>(0, size()),
+                         PlusEqualFunctor(dataV, otherV));
+    dynk::setModified<MS>(mData);
+  });
 
   return *this;
 }
