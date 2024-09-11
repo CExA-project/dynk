@@ -48,7 +48,8 @@ void test_parallel_for_mdrange(bool const isExecutedOnDevice) {
 
   auto dataV = dynk::getViewAnonymous(dataDV, isExecutedOnDevice);
   dynk::parallel_for(
-      isExecutedOnDevice, "label", dynk::MDRangePolicy<2>({0, 0}, {10, 10}),
+      isExecutedOnDevice, "label",
+      dynk::MDRangePolicy<Kokkos::Rank<2>>({0, 0}, {10, 10}),
       KOKKOS_LAMBDA(int const i, int const j) { dataV(i, j) = i * 100 + j; });
   dynk::setModified(dataDV, isExecutedOnDevice);
 

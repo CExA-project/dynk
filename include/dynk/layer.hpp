@@ -56,15 +56,15 @@ public:
  *
  * @tparam rank Rank of the multidimensional range.
  */
-template <std::size_t rank> class MDRangePolicy {
-  Kokkos::Array<std::size_t, rank> mBegin;
-  Kokkos::Array<std::size_t, rank> mEnd;
-  Kokkos::Array<std::size_t, rank> mTile;
+template <typename Rank> class MDRangePolicy {
+  Kokkos::Array<std::size_t, Rank::rank> mBegin;
+  Kokkos::Array<std::size_t, Rank::rank> mEnd;
+  Kokkos::Array<std::size_t, Rank::rank> mTile;
 
 public:
-  MDRangePolicy(Kokkos::Array<std::size_t, rank> begin,
-                Kokkos::Array<std::size_t, rank> end,
-                Kokkos::Array<std::size_t, rank> tile = {})
+  MDRangePolicy(Kokkos::Array<std::size_t, Rank::rank> begin,
+                Kokkos::Array<std::size_t, Rank::rank> end,
+                Kokkos::Array<std::size_t, Rank::rank> tile = {})
       : mBegin(begin), mEnd(end), mTile(tile) {}
 
   /**
@@ -74,8 +74,7 @@ public:
    * @return Execution policy.
    */
   template <typename ExecutionSpace> auto getPolicy() const {
-    return Kokkos::MDRangePolicy<ExecutionSpace, Kokkos::Rank<rank>>(
-        mBegin, mEnd, mTile);
+    return Kokkos::MDRangePolicy<ExecutionSpace, Rank>(mBegin, mEnd, mTile);
   }
 };
 
