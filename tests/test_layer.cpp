@@ -10,7 +10,7 @@ void test_parallel_for_range(bool const isExecutedOnDevice) {
 
   auto dataV = dynk::getViewAnonymous(dataDV, isExecutedOnDevice);
   dynk::parallel_for(
-      isExecutedOnDevice, "label", dynk::RangePolicyCreator(0, 10),
+      isExecutedOnDevice, "label", dynk::RangePolicy(0, 10),
       KOKKOS_LAMBDA(int const i) { dataV(i) = i; });
   dynk::setModified(dataDV, isExecutedOnDevice);
 
@@ -48,8 +48,7 @@ void test_parallel_for_mdrange(bool const isExecutedOnDevice) {
 
   auto dataV = dynk::getViewAnonymous(dataDV, isExecutedOnDevice);
   dynk::parallel_for(
-      isExecutedOnDevice, "label",
-      dynk::MDRangePolicyCreator<2>({0, 0}, {10, 10}),
+      isExecutedOnDevice, "label", dynk::MDRangePolicy<2>({0, 0}, {10, 10}),
       KOKKOS_LAMBDA(int const i, int const j) { dataV(i, j) = i * 100 + j; });
   dynk::setModified(dataDV, isExecutedOnDevice);
 
@@ -65,7 +64,7 @@ TEST(test_parallel_for, test_mdrange) {
 void test_parallel_reduce_range(bool const isExecutedOnDevice) {
   int value = 0;
   dynk::parallel_reduce(
-      isExecutedOnDevice, "label", dynk::RangePolicyCreator(0, 10),
+      isExecutedOnDevice, "label", dynk::RangePolicy(0, 10),
       KOKKOS_LAMBDA(int const i, int &valueLocal) { valueLocal += 1; }, value);
 
   EXPECT_EQ(value, 10);

@@ -293,12 +293,13 @@ void doSomething() {
 
 ### Layer approach
 
-The layer approach aims to propose alternate versions of the `parallel_for` and `parallel_reduce` functions, with a similar signature.
-The list of arguments is prepended with a Boolean value, indicating if the code should run on the device or not.
-Note that this approach requires to reimplement Kokkos feature and is *difficult to maintain* for the long run.
+The layer approach aims to propose alternate versions of Kokkos `parallel_*` (parallel constructs) and `*Policy` (execution policies), with a very similar signature.
+For parallel constructs, the list of arguments is prepended with a Boolean value, indicating if the code should run on the device or not.
+The execution policy argument is replace to accept a Dynk execution policy of the same signature, which only keeps parameters to construct a Kokkos execution policy later.
+Note that this approach requires to reimplement Kokkos features and is *difficult to maintain* for the long run.
 Only the most common uses that appear in the documentation are reproduced.
 
-In your C++ files, you would replace your existing `parallel_for` or `parallel_reduce` by their equivalent from dynk:
+In your C++ files, you would replace your existing `parallel_for` and `parallel_reduce` functions, as well as your existing `RangePolicy` and `MDRangePolicy` objects by their equivalent from Dynk:
 
 ```cpp
 #include <Kokkos_Core.hpp>
@@ -314,7 +315,7 @@ void doSomething() {
 
     // modified parallel for
     dynk::parallel_for(
-        isExecutedOnDevice, "label", Kokkos::RangePolicy(0, 10),
+        isExecutedOnDevice, "label", dynk::RangePolicy(0, 10),
         KOKKOS_LAMBDA (int const i) {
         dataV(i) = i;
         }

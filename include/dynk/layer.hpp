@@ -32,12 +32,12 @@ namespace dynk {
 /**
  * Store parameters to create a `Kokkos::RangePolicy`.
  */
-class RangePolicyCreator {
+class RangePolicy {
   std::size_t mBegin;
   std::size_t mEnd;
 
 public:
-  RangePolicyCreator(std::size_t const begin, std::size_t const end)
+  RangePolicy(std::size_t const begin, std::size_t const end)
       : mBegin(begin), mEnd(end) {}
 
   /**
@@ -56,15 +56,15 @@ public:
  *
  * @tparam rank Rank of the multidimensional range.
  */
-template <std::size_t rank> class MDRangePolicyCreator {
+template <std::size_t rank> class MDRangePolicy {
   Kokkos::Array<std::size_t, rank> mBegin;
   Kokkos::Array<std::size_t, rank> mEnd;
   Kokkos::Array<std::size_t, rank> mTile;
 
 public:
-  MDRangePolicyCreator(Kokkos::Array<std::size_t, rank> begin,
-                       Kokkos::Array<std::size_t, rank> end,
-                       Kokkos::Array<std::size_t, rank> tile = {})
+  MDRangePolicy(Kokkos::Array<std::size_t, rank> begin,
+                Kokkos::Array<std::size_t, rank> end,
+                Kokkos::Array<std::size_t, rank> tile = {})
       : mBegin(begin), mEnd(end), mTile(tile) {}
 
   /**
@@ -96,18 +96,18 @@ auto getPolicy(SizeType const end) {
 }
 
 /**
- * Get an execution policy from an execution policy creator.
+ * Get a Kokkos execution policy from a Dynk execution policy.
  *
  * @tparam ExecutionSpace Execution space of the execution policy.
- * @tparam ExecutionPolicyCreator Type of the execution policy creator.
- * @param executionPolicyCreator Execution policy creator.
+ * @tparam ExecutionPolicy Type of the Dynk execution policy.
+ * @param executionPolicy Dynk execution policy.
  * @return Execution policy.
  */
-template <typename ExecutionSpace, typename ExecutionPolicyCreator,
-          typename Enable =
-              std::enable_if_t<!std::is_integral_v<ExecutionPolicyCreator>>>
-auto getPolicy(ExecutionPolicyCreator const &executionPolicyCreator) {
-  return executionPolicyCreator.template getPolicy<ExecutionSpace>();
+template <
+    typename ExecutionSpace, typename ExecutionPolicy,
+    typename Enable = std::enable_if_t<!std::is_integral_v<ExecutionPolicy>>>
+auto getPolicy(ExecutionPolicy const &executionPolicy) {
+  return executionPolicy.template getPolicy<ExecutionSpace>();
 }
 
 } // namespace impl
@@ -116,7 +116,7 @@ auto getPolicy(ExecutionPolicyCreator const &executionPolicyCreator) {
  * Parallel for that can be executed dynamically on device or on host
  * depending on a Boolean parameter.
  *
- * @tparam ExecutionPolicyCreator Type of the execution policy creator.
+ * @tparam ExecutionPolicy Type of the Dynk execution policy.
  * @tparam Kernel Type of the kernel.
  * @tparam DeviceExecutionSpace Kokkos execution space for device execution,
  * defaults to Kokkos default execution space.
@@ -125,29 +125,27 @@ auto getPolicy(ExecutionPolicyCreator const &executionPolicyCreator) {
  * @param isExecutedOnDevice If `true`, the parallel for is executed on the
  * device, otherwise on the host.
  * @param label Label of the kernel.
- * @param executionPolicyCreator Object containing the parameters to create an
+ * @param executionPolicy Object containing the parameters to create a Kokkos
  * execution policy.
  * @param kernel Kernel to execute withing a Kokkos parallel for region.
  */
 template <
-    typename ExecutionPolicyCreator, typename Kernel,
+    typename ExecutionPolicy, typename Kernel,
     typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
     typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
     typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace,
     typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
 void parallel_for(bool const isExecutedOnDevice, std::string const &label,
-                  ExecutionPolicyCreator const &executionPolicyCreator,
+                  ExecutionPolicy const &executionPolicy,
                   Kernel const &kernel) {
   if (isExecutedOnDevice) {
     // device execution
     Kokkos::parallel_for(
-        label, impl::getPolicy<DeviceExecutionSpace>(executionPolicyCreator),
-        kernel);
+        label, impl::getPolicy<DeviceExecutionSpace>(executionPolicy), kernel);
   } else {
     // host execution
     Kokkos::parallel_for(
-        label, impl::getPolicy<HostExecutionSpace>(executionPolicyCreator),
-        kernel);
+        label, impl::getPolicy<HostExecutionSpace>(executionPolicy), kernel);
   }
 }
 
@@ -155,7 +153,7 @@ void parallel_for(bool const isExecutedOnDevice, std::string const &label,
  * Parallel reduce that can be executed dynamically on device or on host
  * depending on a Boolean parameter.
  *
- * @tparam ExecutionPolicyCreator Type of the execution policy creator.
+ * @tparam ExecutionPolicy Type of the Dynk execution policy.
  * @tparam Kernel Type of the kernel.
  * @tparam Reducer Type of the reducers.
  * @tparam DeviceExecutionSpace Kokkos execution space for device execution,
@@ -165,30 +163,29 @@ void parallel_for(bool const isExecutedOnDevice, std::string const &label,
  * @param isExecutedOnDevice If `true`, the parallel for is executed on the
  * device, otherwise on the host.
  * @param label Label of the kernel.
- * @param executionPolicyCreator Object containing the parameters to create an
+ * @param executionPolicy Object containing the parameters to create a Kokkos
  * execution policy.
  * @param kernel Kernel to execute withing a Kokkos parallel for region.
  */
 template <
-    typename ExecutionPolicyCreator, typename Kernel, typename... Reducer,
+    typename ExecutionPolicy, typename Kernel, typename... Reducer,
     typename DeviceExecutionSpace = Kokkos::DefaultExecutionSpace,
     typename DeviceMemorySpace = Kokkos::DefaultExecutionSpace::memory_space,
     typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace,
     typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
 void parallel_reduce(bool const isExecutedOnDevice, std::string const &label,
-                     ExecutionPolicyCreator const &executionPolicyCreator,
+                     ExecutionPolicy const &executionPolicy,
                      Kernel const &kernel, Reducer &...reducers) {
   if (isExecutedOnDevice) {
     // device execution
     Kokkos::parallel_reduce(
-        label,
-        executionPolicyCreator.template getPolicy<DeviceExecutionSpace>(),
+        label, executionPolicy.template getPolicy<DeviceExecutionSpace>(),
         kernel, reducers...);
   } else {
     // host execution
     Kokkos::parallel_reduce(
-        label, executionPolicyCreator.template getPolicy<HostExecutionSpace>(),
-        kernel, reducers...);
+        label, executionPolicy.template getPolicy<HostExecutionSpace>(), kernel,
+        reducers...);
   }
 }
 
