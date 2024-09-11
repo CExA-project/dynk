@@ -150,13 +150,13 @@ Depending on the passed Boolean `isExecutedOnDevice`, the former or the later wo
 
 The advantage of this approach is its small impact at build time (lightweight library), and the fact that it lets the user do Kokkos code using regular Kokkos functions.
 When the dynamic approach is not desired anymore in the user's code, it would be pretty easy to get rid of the library and obtain a plain Kokkos code.
-On the other hand, the disadvantage is the C++20 requirement and its lack of support with NVCC.
+On the other hand, the disadvantage is the C++20 requirement and its lack of support for one compiler.
 
 This approach works with Clang, ROCm and the Intel LLVM compiler.
 However, this does not work with NVCC, as of Cuda 12.5: is not possible to define an extended lambda (i.e. a lambda with attributes `__host__ __device__`) within a generic lambda (i.e. a templated lambda) with this compiler.
 By default, the CMake configuration allows to build test cases using this feature, this can be disabled with the CMake option `DYNK_ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA`.
 
-For that, we propose a derived approach.
+To make the code work with all compilers, we propose a derived approach.
 
 #### Wrapper functor approach
 
@@ -202,8 +202,8 @@ void doSomething() {
 }
 ```
 
-Note that the Kokkos kernel is supplied as a functor now.
-This works with NVCC.
+Note that the Kokkos kernel is supplied as a functor now, which is another Kokkos standard way to pass parallel code.
+This works with NVCC and with the other compilers.
 
 As using a functor is cumbersome another approach is possible.
 
@@ -242,13 +242,13 @@ void doSomething() {
         isExecutedOnDevice,
         [&]<typename ExecutionSpace, typename MemorySpace>() {
         // notice the two template arguments above
-        doSomethingFreeFunction(dataDV);
+        doSomethingFreeFunction<ExecutionSpace, MemorySpace>(dataDV);
         }
         );
 }
 ```
 
-This still requires to scatter the code, which makes it less readable.
+This still requires to scatter the code however, which makes it less readable.
 
 #### Wrapper 2 functions approach
 
