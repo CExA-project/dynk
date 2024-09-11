@@ -33,23 +33,22 @@ namespace dynk {
  * Store parameters to create a `Kokkos::RangePolicy`.
  */
 class RangePolicyCreator {
-    std::size_t mBegin;
-    std::size_t mEnd;
+  std::size_t mBegin;
+  std::size_t mEnd;
 
-    public:
+public:
+  RangePolicyCreator(std::size_t const begin, std::size_t const end)
+      : mBegin(begin), mEnd(end) {}
 
-    RangePolicyCreator(std::size_t const begin, std::size_t const end) : mBegin(begin), mEnd(end) {}
-
-    /**
-     * Create a `Kokkor::RangePolicy`.
-     *
-     * @tparam ExecutionSpace Execution space of the execution policy.
-     * @return Execution policy.
-     */
-    template <typename ExecutionSpace>
-    auto getPolicy() const {
-        return Kokkos::RangePolicy<ExecutionSpace>(mBegin, mEnd);
-    }
+  /**
+   * Create a `Kokkor::RangePolicy`.
+   *
+   * @tparam ExecutionSpace Execution space of the execution policy.
+   * @return Execution policy.
+   */
+  template <typename ExecutionSpace> auto getPolicy() const {
+    return Kokkos::RangePolicy<ExecutionSpace>(mBegin, mEnd);
+  }
 };
 
 /**
@@ -57,33 +56,27 @@ class RangePolicyCreator {
  *
  * @tparam rank Rank of the multidimensional range.
  */
-template <std::size_t rank>
-class MDRangePolicyCreator {
-    Kokkos::Array<std::size_t, rank> mBegin;
-    Kokkos::Array<std::size_t, rank> mEnd;
-    Kokkos::Array<std::size_t, rank> mTile;
+template <std::size_t rank> class MDRangePolicyCreator {
+  Kokkos::Array<std::size_t, rank> mBegin;
+  Kokkos::Array<std::size_t, rank> mEnd;
+  Kokkos::Array<std::size_t, rank> mTile;
 
-    public:
+public:
+  MDRangePolicyCreator(Kokkos::Array<std::size_t, rank> begin,
+                       Kokkos::Array<std::size_t, rank> end,
+                       Kokkos::Array<std::size_t, rank> tile = {})
+      : mBegin(begin), mEnd(end), mTile(tile) {}
 
-    MDRangePolicyCreator(
-            Kokkos::Array<std::size_t, rank> begin,
-            Kokkos::Array<std::size_t, rank> end,
-            Kokkos::Array<std::size_t, rank> tile = {}) :
-        mBegin(begin),
-        mEnd(end),
-        mTile(tile)
-                {}
-
-    /**
-     * Create a `Kokkor::MDRangePolicy`.
-     *
-     * @tparam ExecutionSpace Execution space of the execution policy.
-     * @return Execution policy.
-     */
-    template <typename ExecutionSpace>
-    auto getPolicy() const {
-        return Kokkos::MDRangePolicy<ExecutionSpace, Kokkos::Rank<rank>>(mBegin, mEnd, mTile);
-    }
+  /**
+   * Create a `Kokkor::MDRangePolicy`.
+   *
+   * @tparam ExecutionSpace Execution space of the execution policy.
+   * @return Execution policy.
+   */
+  template <typename ExecutionSpace> auto getPolicy() const {
+    return Kokkos::MDRangePolicy<ExecutionSpace, Kokkos::Rank<rank>>(
+        mBegin, mEnd, mTile);
+  }
 };
 
 namespace impl {
@@ -96,10 +89,10 @@ namespace impl {
  * @param end Last iteration to perform.
  * @return Single-dimension execution policy.
  */
-template <typename ExecutionSpace, typename SizeType, typename Enable =
-    std::enable_if_t<std::is_integral_v<SizeType>>>
+template <typename ExecutionSpace, typename SizeType,
+          typename Enable = std::enable_if_t<std::is_integral_v<SizeType>>>
 auto getPolicy(SizeType const end) {
-    return Kokkos::RangePolicy<ExecutionSpace>(0, end);
+  return Kokkos::RangePolicy<ExecutionSpace>(0, end);
 }
 
 /**
@@ -110,10 +103,11 @@ auto getPolicy(SizeType const end) {
  * @param executionPolicyCreator Execution policy creator.
  * @return Execution policy.
  */
-template <typename ExecutionSpace, typename ExecutionPolicyCreator, typename
-Enable = std::enable_if_t<!std::is_integral_v<ExecutionPolicyCreator>>>
-auto getPolicy(ExecutionPolicyCreator const& executionPolicyCreator) {
-    return executionPolicyCreator.template getPolicy<ExecutionSpace>();
+template <typename ExecutionSpace, typename ExecutionPolicyCreator,
+          typename Enable =
+              std::enable_if_t<!std::is_integral_v<ExecutionPolicyCreator>>>
+auto getPolicy(ExecutionPolicyCreator const &executionPolicyCreator) {
+  return executionPolicyCreator.template getPolicy<ExecutionSpace>();
 }
 
 } // namespace impl
@@ -142,18 +136,17 @@ template <
     typename HostExecutionSpace = Kokkos::DefaultHostExecutionSpace,
     typename HostMemorySpace = Kokkos::DefaultHostExecutionSpace::memory_space>
 void parallel_for(bool const isExecutedOnDevice, std::string const &label,
-                  ExecutionPolicyCreator const& executionPolicyCreator,
+                  ExecutionPolicyCreator const &executionPolicyCreator,
                   Kernel const &kernel) {
   if (isExecutedOnDevice) {
     // device execution
-    Kokkos::parallel_for(label,
-                         impl::getPolicy<DeviceExecutionSpace>(executionPolicyCreator),
-                         kernel);
+    Kokkos::parallel_for(
+        label, impl::getPolicy<DeviceExecutionSpace>(executionPolicyCreator),
+        kernel);
   } else {
     // host execution
     Kokkos::parallel_for(
-        label,
-        impl::getPolicy<HostExecutionSpace>(executionPolicyCreator),
+        label, impl::getPolicy<HostExecutionSpace>(executionPolicyCreator),
         kernel);
   }
 }
@@ -187,14 +180,14 @@ void parallel_reduce(bool const isExecutedOnDevice, std::string const &label,
                      Kernel const &kernel, Reducer &...reducers) {
   if (isExecutedOnDevice) {
     // device execution
-    Kokkos::parallel_reduce(label,
-                            executionPolicyCreator.template getPolicy<DeviceExecutionSpace>(),
-                            kernel, reducers...);
+    Kokkos::parallel_reduce(
+        label,
+        executionPolicyCreator.template getPolicy<DeviceExecutionSpace>(),
+        kernel, reducers...);
   } else {
     // host execution
     Kokkos::parallel_reduce(
-        label,
-        executionPolicyCreator.template getPolicy<HostExecutionSpace>(),
+        label, executionPolicyCreator.template getPolicy<HostExecutionSpace>(),
         kernel, reducers...);
   }
 }
