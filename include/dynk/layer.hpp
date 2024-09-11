@@ -179,12 +179,12 @@ void parallel_reduce(bool const isExecutedOnDevice, std::string const &label,
   if (isExecutedOnDevice) {
     // device execution
     Kokkos::parallel_reduce(
-        label, executionPolicy.template getPolicy<DeviceExecutionSpace>(),
-        kernel, reducers...);
+        label, impl::getPolicy<DeviceExecutionSpace>(executionPolicy), kernel,
+        reducers...);
   } else {
     // host execution
     Kokkos::parallel_reduce(
-        label, executionPolicy.template getPolicy<HostExecutionSpace>(), kernel,
+        label, impl::getPolicy<HostExecutionSpace>(executionPolicy), kernel,
         reducers...);
   }
 }
