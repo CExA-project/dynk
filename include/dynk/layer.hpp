@@ -18,9 +18,6 @@
  * execution space selection in the first place.
  */
 
-#include <array>
-#include <initializer_list>
-#include <memory>
 #include <string>
 
 #include <Kokkos_Core.hpp>
@@ -81,10 +78,10 @@ public:
 namespace impl {
 
 /**
- * Get an execution policy from an integer.
+ * Get a Kokkos execution policy from an integer.
  *
  * @tparam ExecutionSpace Execution space of the execution policy.
- * @tparam SizeType Type of the size.
+ * @tparam SizeType Type of the indexes.
  * @param end Last iteration to perform.
  * @return Single-dimension execution policy.
  */
