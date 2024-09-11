@@ -1,5 +1,13 @@
-#ifndef __DYNAMIC_HPP__
-#define __DYNAMIC_HPP__
+#ifndef __DYNK_WRAPPER_HPP__
+#define __DYNK_WRAPPER_HPP__
+
+/**
+ * Wrapper approach.
+ *
+ * This approach proposes to encapsulate the parallel block and memory
+ * management in templated functions or templated lambdas, and to dynamically
+ * execute whichever is requested at runtime.
+ */
 
 #include <Kokkos_Core.hpp>
 
@@ -75,4 +83,4 @@ void wrap(bool const isExecutedOnDevice,
 
 } // namespace dynk
 
-#endif // ifndef __DYNAMIC_HPP__
+#endif // ifndef __DYNK_WRAPPER_HPP__

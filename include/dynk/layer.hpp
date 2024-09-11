@@ -1,11 +1,13 @@
-#ifndef __DYNAMIC_KOKKOS_HPP__
-#define __DYNAMIC_KOKKOS_HPP__
+#ifndef __DYNK_LAYER_HPP__
+#define __DYNK_LAYER_HPP__
 
 /**
- * This code proposes helper functions to run parallel block regions on either
- * the device or on the host, the choice being done at runtime. The signature
- * of the familiar `parallel_for` and `parallel_reduce` functions is left
- * similar, the list of paramuments is prepended with a Boolean value,
+ * Layer approach.
+ *
+ * This approach proposes helper functions to run parallel block regions on
+ * either the device or on the host, the choice being done at runtime. The
+ * signature of the familiar `parallel_for` and `parallel_reduce` functions is
+ * left similar, the list of paramuments is prepended with a Boolean value,
  * indicating if the code should run on the device (i.e. on
  * `Kokkos::DefaultExecutionSpace` by default) or not (i.e. on
  * `Kokkos::DefaultHostExecutionSpace` by default). Note that only the most
@@ -151,4 +153,4 @@ void parallel_reduce(bool const isExecutedOnDevice, std::string const &label,
 
 } // namespace dynk
 
-#endif // __DYNAMIC_KOKKOS_HPP__
+#endif // __DYNK_LAYER_HPP__
