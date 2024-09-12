@@ -4,6 +4,8 @@
 
 First version.
 
-## Unversioned changes
+## Version 0.2.0
 
 - Use custom execution policies (`dynk::RangePolicy` and `dynk::MDRangePolicy`) that create Kokkos execution policies instead of recreating Kokkos execution policies from themselves.
+
+## Unversioned changes
