@@ -43,7 +43,7 @@ public:
    * @tparam ExecutionSpace Execution space of the execution policy.
    * @return Execution policy.
    */
-  template <typename ExecutionSpace> auto getPolicy() const {
+  template <typename ExecutionSpace> auto getExecutionPolicy() const {
     return Kokkos::RangePolicy<ExecutionSpace>(mBegin, mEnd);
   }
 };
@@ -70,7 +70,7 @@ public:
    * @tparam ExecutionSpace Execution space of the execution policy.
    * @return Execution policy.
    */
-  template <typename ExecutionSpace> auto getPolicy() const {
+  template <typename ExecutionSpace> auto getExecutionPolicy() const {
     return Kokkos::MDRangePolicy<ExecutionSpace, Rank>(mBegin, mEnd, mTile);
   }
 };
@@ -87,7 +87,7 @@ namespace impl {
  */
 template <typename ExecutionSpace, typename SizeType,
           typename Enable = std::enable_if_t<std::is_integral_v<SizeType>>>
-auto getPolicy(SizeType const end) {
+auto getExecutionPolicy(SizeType const end) {
   return Kokkos::RangePolicy<ExecutionSpace>(0, end);
 }
 
@@ -102,8 +102,8 @@ auto getPolicy(SizeType const end) {
 template <
     typename ExecutionSpace, typename ExecutionPolicy,
     typename Enable = std::enable_if_t<!std::is_integral_v<ExecutionPolicy>>>
-auto getPolicy(ExecutionPolicy const &executionPolicy) {
-  return executionPolicy.template getPolicy<ExecutionSpace>();
+auto getExecutionPolicy(ExecutionPolicy const &executionPolicy) {
+  return executionPolicy.template getExecutionPolicy<ExecutionSpace>();
 }
 
 } // namespace impl
@@ -137,11 +137,13 @@ void parallel_for(bool const isExecutedOnDevice, std::string const &label,
   if (isExecutedOnDevice) {
     // device execution
     Kokkos::parallel_for(
-        label, impl::getPolicy<DeviceExecutionSpace>(executionPolicy), kernel);
+        label, impl::getExecutionPolicy<DeviceExecutionSpace>(executionPolicy),
+        kernel);
   } else {
     // host execution
     Kokkos::parallel_for(
-        label, impl::getPolicy<HostExecutionSpace>(executionPolicy), kernel);
+        label, impl::getExecutionPolicy<HostExecutionSpace>(executionPolicy),
+        kernel);
   }
 }
 
@@ -175,13 +177,13 @@ void parallel_reduce(bool const isExecutedOnDevice, std::string const &label,
   if (isExecutedOnDevice) {
     // device execution
     Kokkos::parallel_reduce(
-        label, impl::getPolicy<DeviceExecutionSpace>(executionPolicy), kernel,
-        reducers...);
+        label, impl::getExecutionPolicy<DeviceExecutionSpace>(executionPolicy),
+        kernel, reducers...);
   } else {
     // host execution
     Kokkos::parallel_reduce(
-        label, impl::getPolicy<HostExecutionSpace>(executionPolicy), kernel,
-        reducers...);
+        label, impl::getExecutionPolicy<HostExecutionSpace>(executionPolicy),
+        kernel, reducers...);
   }
 }
 
