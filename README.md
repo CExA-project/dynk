@@ -293,12 +293,14 @@ void doSomething() {
 
 ### Layer approach
 
-The layer approach aims to propose alternate versions of the `parallel_for` and `parallel_reduce` functions, with a similar signature.
-The list of arguments is prepended with a Boolean value, indicating if the code should run on the device or not.
-Note that this approach requires to reimplement Kokkos feature and is *difficult to maintain* for the long run.
+The layer approach aims to propose alternate versions of Kokkos parallel constructs (`parallel_*`) and execution policies (`*Policy`), with a very similar signature.
+For Dynk parallel constructs, the list of arguments is prepended with a Boolean value, indicating if the code should run on the device or not.
+The Kokkos execution policy argument is replaced to accept a Dynk execution policy of the same signature, which only keeps parameters to construct a Kokkos execution policy later.
+The Dynk execution policy does not take an execution space template argument or regular argument anymore, it is passed by the Dynk parallel construct directly when using it.
+Note that this approach requires to reimplement some Kokkos features and is *difficult to maintain* for the long run.
 Only the most common uses that appear in the documentation are reproduced.
 
-In your C++ files, you would replace your existing `parallel_for` or `parallel_reduce` by their equivalent from dynk:
+In your C++ files, you would replace your existing `parallel_for` and `parallel_reduce` functions, as well as your existing `RangePolicy` and `MDRangePolicy` objects by their equivalent from Dynk:
 
 ```cpp
 #include <Kokkos_Core.hpp>
@@ -314,7 +316,7 @@ void doSomething() {
 
     // modified parallel for
     dynk::parallel_for(
-        isExecutedOnDevice, "label", Kokkos::RangePolicy(0, 10),
+        isExecutedOnDevice, "label", dynk::RangePolicy(0, 10),
         KOKKOS_LAMBDA (int const i) {
         dataV(i) = i;
         }
@@ -325,10 +327,11 @@ void doSomething() {
 }
 ```
 
-This approach requires to replace the `Kokkos` namespace of the parallel construct by `dynk`, and to add the Boolean value as its first argument.
-Accessing the right View from a DualView is made with the `dynk::getViewAnonymous` function, that returns a Kokkos View in an `Kokkos::AnonymousSpace`.
+This approach requires to replace the `Kokkos` namespace of the parallel construct and of the execution policy by `dynk`, and to perform according modifications (add the Boolean value as first argument for `parallel_for`, do not pass an execution space for `RangePolicy`).
+Accessing the right View from a DualView is made with the `dynk::getViewAnonymous` function, which returns a Kokkos View in an `Kokkos::AnonymousSpace`.
 This type of View has no known memory space at compile time, it is defined by affectation dynamically during runtime.
 Please note that this feature, though available in the public Kokkos API, is *not documented*.
+Especially, such Views should only be used for kernels.
 
 #### What is supported so far
 
