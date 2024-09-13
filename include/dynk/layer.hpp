@@ -136,6 +136,8 @@ template <
 void parallel_for(bool const isExecutedOnDevice, std::string const &label,
                   ExecutionPolicy const &executionPolicy,
                   Kernel const &kernel) {
+  Kokkos::fence("begin of dynamic parallel for");
+
   if (isExecutedOnDevice) {
     // device execution
     Kokkos::parallel_for(
@@ -147,6 +149,8 @@ void parallel_for(bool const isExecutedOnDevice, std::string const &label,
         label, impl::getExecutionPolicy<HostExecutionSpace>(executionPolicy),
         kernel);
   }
+
+  Kokkos::fence("end of dynamic parallel for");
 }
 
 /**
@@ -176,6 +180,8 @@ template <
 void parallel_reduce(bool const isExecutedOnDevice, std::string const &label,
                      ExecutionPolicy const &executionPolicy,
                      Kernel const &kernel, Reducer &...reducers) {
+  Kokkos::fence("begin of dynamic parallel reduce");
+
   if (isExecutedOnDevice) {
     // device execution
     Kokkos::parallel_reduce(
@@ -187,6 +193,8 @@ void parallel_reduce(bool const isExecutedOnDevice, std::string const &label,
         label, impl::getExecutionPolicy<HostExecutionSpace>(executionPolicy),
         kernel, reducers...);
   }
+
+  Kokkos::fence("end of dynamic parallel reduce");
 }
 
 } // namespace dynk
