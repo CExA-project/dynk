@@ -11,3 +11,4 @@ First version.
 ## Unversioned changes
 
 - Use fences for the layer approach, after and before the parallel block.
+- Add documentation.
