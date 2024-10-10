@@ -85,6 +85,12 @@ If you don't have a GPU available when compiling, you have to disable the CMake 
 You can build examples with the CMake option `DYNK_ENABLE_EXAMPLES`.
 They should be run individually.
 
+## Documentation
+
+The API documentation is handled by Doxygen (1.9.1 or newer) and is built with the CMake option `DYNK_ENABLE_DOCUMENTATION`.
+The private API is not included by default and is added with the option `DYNK_ENABLE_DOCUMENTATION_DEVMODE`.
+The documentation is built with the target `docs`.
+
 ## Use
 
 The library offers the *layer* approach and the *wrapper* approach.

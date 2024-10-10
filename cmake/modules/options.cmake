@@ -23,3 +23,9 @@ endif()
 
 # allow gtest to discover tests
 option(DYNK_ENABLE_GTEST_DISCOVER_TESTS "Enable Gtest to discover tests by attempting to run them" ON)
+
+# documentation
+option(DYNK_ENABLE_DOCUMENTATION "Build documentation of the library")
+
+# documentation for project developers
+option(DYNK_ENABLE_DOCUMENTATION_DEVMODE "Build developers documentation of the library")

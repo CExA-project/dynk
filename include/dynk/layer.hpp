@@ -170,6 +170,7 @@ void parallel_for(bool const isExecutedOnDevice, std::string const &label,
  * @param executionPolicy Object containing the parameters to create a Kokkos
  * execution policy.
  * @param kernel Kernel to execute withing a Kokkos parallel for region.
+ * @param reducers All reducers to use.
  */
 template <
     typename ExecutionPolicy, typename Kernel, typename... Reducer,

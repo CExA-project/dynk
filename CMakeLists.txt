@@ -23,3 +23,7 @@ endif()
 if(DYNK_ENABLE_EXAMPLES)
     add_subdirectory(examples)
 endif()
+
+if(DYNK_ENABLE_DOCUMENTATION)
+    add_subdirectory(docs)
+endif()
