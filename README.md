@@ -36,7 +36,7 @@ In your main CMake file:
 include(FetchContent)
 FetchContent_Declare(
     dynk
-    URL https://github.com/CExA-project/dynk/archive/refs/tags/0.2.0.tar.gz
+    URL https://github.com/CExA-project/dynk/archive/refs/tags/0.3.0.tar.gz
 )
 FetchContent_MakeAvailable(dynk)
 

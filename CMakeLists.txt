@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 project(
     Dynk
     LANGUAGES CXX
-    VERSION 0.2.0
+    VERSION 0.3.0
 )
 
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules")

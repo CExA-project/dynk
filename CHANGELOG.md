@@ -8,7 +8,9 @@ First version.
 
 - Use custom execution policies (`dynk::RangePolicy` and `dynk::MDRangePolicy`) that create Kokkos execution policies instead of recreating Kokkos execution policies from themselves.
 
-## Unversioned changes
+## Version 0.3.0
 
 - Use fences for the layer approach, after and before the parallel block.
 - Add documentation.
+
+## Unversioned changes
