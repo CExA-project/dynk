@@ -3,22 +3,11 @@ add_library(
     INTERFACE
 )
 
-target_sources(
-    dynk
-    INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynk/dual_view.hpp>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynk/layer.hpp>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynk/wrapper.hpp>
-        $<INSTALL_INTERFACE:dynk/dual_view.hpp>
-        $<INSTALL_INTERFACE:dynk/layer.hpp>
-        $<INSTALL_INTERFACE:dynk/wrapper.hpp>
-)
-
 target_include_directories(
     dynk
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
-        $<INSTALL_INTERFACE:.>
+        $<INSTALL_INTERFACE:include>
 )
 
 target_link_libraries(
