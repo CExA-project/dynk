@@ -128,8 +128,8 @@ void doSomething() {
         [&]<typename ExecutionSpace, typename MemorySpace>() {
             // notice the two template arguments above
 
-            // acquire data
-            auto dataV = dynk::getView<MemorySpace>(dataDV);
+            // acquire up-to-date data
+            auto dataV = dynk::getSyncedView<MemorySpace>(dataDV);
 
             // usual parallel for
             Kokkos::parallel_for(
@@ -147,19 +147,23 @@ void doSomething() {
 }
 ```
 
-With this approach, we have two lambdas: one, templated for the execution space and memory space, that contains the parallel block and the data management, and the other which is a classic Kokkos lambda.
-Note that templated lambdas are only available with C++20.
+With this approach, we have two lambdas: one, templated for the execution space and the memory space, that contains the parallel block and the data management, and the other which is a classic Kokkos lambda.
+Note that templated lambdas are only available from C++20.
 By default, the CMake configuration sets the language standard accordingly, this can be disabled with the CMake option `DYNK_ENABLE_CXX20_FEATURES`.
 
 `dynk::wrap` would create two versions of the passed templated lambda: one for the device (with default execution space and default execution space's default memory space), and one for the host (with default host executions space and default host execution space's default memory space).
 Depending on the passed Boolean `isExecutedOnDevice`, the former or the later would be executed.
 
+Note that we use custom functions to handle the dual views, `dynk::getSyncedView` to get the appropriate view (and to synchronize it beforehand if needed), and `dynk::setModified` to mark the view as modified, if necessary.
+This is completely equivalent with calling the corresponding DualView methods directly (the layer approach uses a different signature of the functions, so they are available for the wrapper approach for consistency).
+Note that if the view does not need to be synchronized, calling `dynk::getView` is enough.
+
 The advantage of this approach is its small impact at build time (lightweight library), and the fact that it lets the user do Kokkos code using regular Kokkos functions.
 When the dynamic approach is not desired anymore in the user's code, it would be pretty easy to get rid of the library and obtain a plain Kokkos code.
-On the other hand, the disadvantage is the C++20 requirement and its lack of support for one compiler.
+On the other hand, the disadvantage is the C++20 requirement and the fact that it is not supported by NVCC, as we discuss below.
 
-This approach works with Clang, ROCm and the Intel LLVM compiler.
-However, this does not work with NVCC, as of Cuda 12.5: is not possible to define an extended lambda (i.e. a lambda with attributes `__host__ __device__`) within a generic lambda (i.e. a templated lambda) with this compiler.
+For GPU, this approach works with Clang (for Cuda), ROCm and the Intel LLVM compilers.
+However, it does not work with NVCC, as of Cuda 12.8: it is not possible to define an extended lambda (i.e. a lambda with attributes `__host__ __device__`) within a generic lambda (i.e. a templated lambda) with this compiler.
 By default, the CMake configuration allows to build test cases using this feature, this can be disabled with the CMake option `DYNK_ENABLE_EXTENDED_LAMBDA_IN_GENERIC_LAMBDA`.
 
 To make the code work with all compilers, we propose a derived approach.
@@ -191,8 +195,8 @@ void doSomething() {
         [&]<typename ExecutionSpace, typename MemorySpace>() {
             // notice the two template arguments above
 
-            // acquire data
-            auto dataV = dynk::getView<MemorySpace>(dataDV);
+            // acquire up-to-date data
+            auto dataV = dynk::getSyncedView<MemorySpace>(dataDV);
 
             // usual parallel for
             Kokkos::parallel_for(
@@ -224,8 +228,8 @@ template <typename ExecutionSpace, typename MemorySpace, typename DualView>
 void doSomethingFreeFunction(DualView &dataDV) {
     // notice the two space template arguments above
 
-    // acquire data
-    auto dataV = dynk::getView<MemorySpace>(dataDV);
+    // acquire up-to-date data
+    auto dataV = dynk::getSyncedView<MemorySpace>(dataDV);
 
     // usual parallel for
     Kokkos::parallel_for(
@@ -299,11 +303,11 @@ void doSomething() {
 
 ### Layer approach
 
-The layer approach aims to propose alternate versions of Kokkos parallel constructs (`parallel_*`) and execution policies (`*Policy`), with a very similar signature.
+The layer approach aims to propose alternative versions of Kokkos parallel constructs (`parallel_*`) and execution policies (`*Policy`), with a very similar signature.
 For Dynk parallel constructs, the list of arguments is prepended with a Boolean value, indicating if the code should run on the device or not.
 The Kokkos execution policy argument is replaced to accept a Dynk execution policy of the same signature, which only keeps parameters to construct a Kokkos execution policy later.
-The Dynk execution policy does not take an execution space template argument or regular argument anymore, it is passed by the Dynk parallel construct directly when using it.
-Note that this approach requires to reimplement some Kokkos features and is *difficult to maintain* for the long run.
+The Dynk execution policy does not take an execution space template argument anymore, the execution space is passed by the Dynk parallel construct directly when using it.
+Note that this approach requires to reimplement some Kokkos features and is *difficult to maintain* in the long run.
 Only the most common uses that appear in the documentation are reproduced.
 
 In your C++ files, you would replace your existing `parallel_for` and `parallel_reduce` functions, as well as your existing `RangePolicy` and `MDRangePolicy` objects by their equivalent from Dynk:
@@ -318,7 +322,7 @@ void doSomething() {
     bool isExecutedOnDevice = true;  // can be changed at will
 
     // acquire data
-    auto dataV = dynk::getViewAnonymous(dataDV, isExecutedOnDevice);
+    auto dataV = dynk::getSyncedView(dataDV, isExecutedOnDevice);
 
     // modified parallel for
     dynk::parallel_for(
@@ -333,8 +337,8 @@ void doSomething() {
 }
 ```
 
-This approach requires to replace the `Kokkos` namespace of the parallel construct and of the execution policy by `dynk`, and to perform according modifications (add the Boolean value as first argument for `parallel_for`, do not pass an execution space for `RangePolicy`).
-Accessing the right View from a DualView is made with the `dynk::getViewAnonymous` function, which returns a Kokkos View in an `Kokkos::AnonymousSpace`.
+This approach requires to replace the `Kokkos` namespace of the parallel construct and of the execution policy by `dynk`, and to perform some modifications: add the Boolean value as first argument for `parallel_for`, do not pass an execution space for `RangePolicy`.
+Accessing the right synchronized View from a DualView is made with the `dynk::getSyncedView` function (note that, compared with the wrapper approach, the function now takes a Boolean as argument); the return value is a Kokkos View with a `Kokkos::AnonymousSpace`.
 This type of View has no known memory space at compile time, it is defined by affectation dynamically during runtime.
 Please note that this feature, though available in the public Kokkos API, is *not documented*.
 Especially, such Views should only be used for kernels.
