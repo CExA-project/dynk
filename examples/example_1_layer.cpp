@@ -8,8 +8,8 @@ template <typename T>
 TestArray<T> &TestArray<T>::operator+=(TestArray<T> const &other) {
   bool isExecutedOnDevice = true;
 
-  auto dataV = dynk::getViewAnonymous(mData, isExecutedOnDevice);
-  auto otherV = dynk::getViewAnonymous(other.mData, isExecutedOnDevice);
+  auto dataV = dynk::getView(mData, isExecutedOnDevice);
+  auto otherV = dynk::getView(other.mData, isExecutedOnDevice);
 
   dynk::parallel_for(
       isExecutedOnDevice, "perform += for test array", size(),
