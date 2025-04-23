@@ -2,6 +2,8 @@
 
 ## Unversioned changes
 
+## Version 0.4.0
+
 - Removed `dynk::getAnonymousView` in favor to a new signature of `dynk::getView`.
 - Added `dynk::getSyncedView` with the Boolean value signature.
 - Fixed a bug in `dual_view.hpp` template arguments order.
