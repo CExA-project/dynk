@@ -2,6 +2,10 @@
 
 ## Unversioned changes
 
+- Removed `dynk::getAnonymousView` in favor to a new signature of `dynk::getView`.
+- Added `dynk::getSyncedView` with the Boolean value signature.
+- Fixed a bug in `dual_view.hpp` template arguments order.
+
 ## Version 0.3.0
 
 - Use fences for the layer approach, after and before the parallel block.
