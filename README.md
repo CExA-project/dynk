@@ -321,7 +321,7 @@ void doSomething() {
     Kokkos::DualView<int *> dataDV("data", 10);
     bool isExecutedOnDevice = true;  // can be changed at will
 
-    // acquire data
+    // acquire up-to-date data
     auto dataV = dynk::getSyncedView(dataDV, isExecutedOnDevice);
 
     // modified parallel for
