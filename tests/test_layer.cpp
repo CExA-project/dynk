@@ -46,7 +46,7 @@ void test_parallel_for_range(bool const isExecutedOnDevice) {
   dynk::setModified(dataDV, isExecutedOnDevice);
 
   dataDV.template sync<typename DualView::host_mirror_space>();
-  EXPECT_EQ(dataDV.h_view(5), 5);
+  EXPECT_EQ(dataDV.view_host()(5), 5);
 }
 
 TEST(test_parallel_for, test_range) {
@@ -70,7 +70,7 @@ void test_parallel_for_range_unsync(bool const isExecutedOnDevice) {
   dynk::setModified(dataDV, isExecutedOnDevice);
 
   dataDV.template sync<typename DualView::host_mirror_space>();
-  EXPECT_EQ(dataDV.h_view(5), 15);
+  EXPECT_EQ(dataDV.view_host()(5), 15);
 }
 
 TEST(test_parallel_for, test_range_unsync) {
@@ -89,7 +89,7 @@ void test_parallel_for_range_simple(bool const isExecutedOnDevice) {
   dynk::setModified(dataDV, isExecutedOnDevice);
 
   dataDV.template sync<typename DualView::host_mirror_space>();
-  EXPECT_EQ(dataDV.h_view(5), 5);
+  EXPECT_EQ(dataDV.view_host()(5), 5);
 }
 
 TEST(test_parallel_for, test_range_simple) {
@@ -109,7 +109,7 @@ void test_parallel_for_mdrange(bool const isExecutedOnDevice) {
   dynk::setModified(dataDV, isExecutedOnDevice);
 
   dataDV.template sync<typename DualView::host_mirror_space>();
-  EXPECT_EQ(dataDV.h_view(4, 6), 406);
+  EXPECT_EQ(dataDV.view_host()(4, 6), 406);
 }
 
 TEST(test_parallel_for, test_mdrange) {
@@ -129,7 +129,7 @@ void test_parallel_for_mdrange_tile(bool const isExecutedOnDevice) {
   dynk::setModified(dataDV, isExecutedOnDevice);
 
   dataDV.template sync<typename DualView::host_mirror_space>();
-  EXPECT_EQ(dataDV.h_view(4, 6), 406);
+  EXPECT_EQ(dataDV.view_host()(4, 6), 406);
 }
 
 TEST(test_parallel_for, test_mdrange_tile) {
@@ -153,7 +153,7 @@ void test_parallel_reduce_range(bool const isExecutedOnDevice) {
   dynk::setModified(dataDV, isExecutedOnDevice);
 
   dataDV.template sync<typename DualView::host_mirror_space>();
-  EXPECT_EQ(dataDV.h_view(5), 5);
+  EXPECT_EQ(dataDV.view_host()(5), 5);
   EXPECT_EQ(value, 10);
 }
 

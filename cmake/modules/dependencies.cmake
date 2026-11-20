@@ -1,12 +1,12 @@
 include(FetchContent)
 
-find_package(Kokkos 4.6.0 QUIET)
+find_package(Kokkos 5.2.2 QUIET)
 if(NOT Kokkos_FOUND)
     message(STATUS "Treating Kokkos as an internal dependency")
     FetchContent_Declare(
         kokkos
-        URL https://github.com/kokkos/kokkos/releases/download/4.6.00/kokkos-4.6.00.tar.gz
-        URL_HASH SHA256=be72cf7fc6ef6b99c614f29b945960013a2aaa23859bfe1a560d8d9aa526ec9c
+        URL https://github.com/kokkos/kokkos/releases/download/5.2.2/kokkos-5.2.2.tar.gz
+        URL_HASH SHA256=d6557aaef39302282a15f9c770433d1fcdf4e961dfd6d9ed726b9d0d0f546b9f
     )
     FetchContent_MakeAvailable(kokkos)
 endif()

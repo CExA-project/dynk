@@ -21,7 +21,7 @@ void test_parallel_for_range_lambda(bool const isExecutedOnDevice) {
              });
 
   dataDV.template sync<typename DualView::host_mirror_space>();
-  EXPECT_EQ(dataDV.h_view(5), 5);
+  EXPECT_EQ(dataDV.view_host()(5), 5);
 }
 
 TEST(test_parallel_for, test_range_lambda) {
@@ -56,7 +56,7 @@ void test_parallel_for_range_functor(bool const isExecutedOnDevice) {
              });
 
   dataDV.template sync<typename DualView::host_mirror_space>();
-  EXPECT_EQ(dataDV.h_view(5), 5);
+  EXPECT_EQ(dataDV.view_host()(5), 5);
 }
 
 TEST(test_parallel_for, test_range_functor) {
@@ -87,7 +87,7 @@ void test_parallel_for_range_free_function(bool const isExecutedOnDevice) {
              });
 
   dataDV.template sync<typename DualView::host_mirror_space>();
-  EXPECT_EQ(dataDV.h_view(5), 5);
+  EXPECT_EQ(dataDV.view_host()(5), 5);
 }
 
 TEST(test_parallel_for, test_range_free_function) {
@@ -116,7 +116,7 @@ void test_parallel_for_range_free_function_twice(
       });
 
   dataDV.template sync<typename DualView::host_mirror_space>();
-  EXPECT_EQ(dataDV.h_view(5), 5);
+  EXPECT_EQ(dataDV.view_host()(5), 5);
 }
 
 TEST(test_parallel_for, test_range_free_function_twice) {

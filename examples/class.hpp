@@ -15,7 +15,7 @@ public:
   explicit TestArray(int const n) : mData("test array", n) {}
 
   void fill(T const value = 1) {
-    Kokkos::deep_copy(mData.h_view, value);
+    Kokkos::deep_copy(mData.view_host(), value);
     mData.template modify<typename Kokkos::DefaultHostExecutionSpace>();
     synchronize();
   }
@@ -26,7 +26,7 @@ public:
 
   Kokkos::DualView<T *> const &data() const { return mData; }
 
-  int size() const { return mData.d_view.size(); }
+  int size() const { return mData.view_device().size(); }
 
   void synchronize() {
     mData.template sync<typename Kokkos::DefaultHostExecutionSpace>();
@@ -34,11 +34,11 @@ public:
   }
 
   void show() const {
-    Kokkos::printf("Showing '%s'\n", mData.h_view.label().c_str());
+    Kokkos::printf("Showing '%s'\n", mData.view_host().label().c_str());
     Kokkos::parallel_for(
         "show test array", Kokkos::RangePolicy<Kokkos::Serial>(0, size()),
         KOKKOS_CLASS_LAMBDA(int const i) {
-          Kokkos::printf("%f\n", mData.h_view(i));
+          Kokkos::printf("%f\n", mData.view_host()(i));
         });
   }
 };
